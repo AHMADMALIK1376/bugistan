@@ -1,0 +1,95 @@
+{
+  "name": "bugistan",
+  "displayName": "Bugistan",
+  "description": "🐛 Error aya, cockroach bhaga! Kill bugs with a slipper! 🩴",
+  "version": "1.0.0",
+  "publisher": "ahmadmalik1376",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other",
+    "Themes"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "bugistan.startBugHunt",
+        "title": "Bugistan: Start Bug Hunt 🐛"
+      },
+      {
+        "command": "bugistan.stopBugHunt",
+        "title": "Bugistan: Stop Bug Hunt 🛑"
+      },
+      {
+        "command": "bugistan.showScore",
+        "title": "Bugistan: Show Score 🏆"
+      },
+      {
+        "command": "bugistan.resetScore",
+        "title": "Bugistan: Reset Score 🔄"
+      }
+    ],
+    "views": {
+      "bugistan": [
+        {
+          "id": "bugistan.gameView",
+          "name": "🐛 Bug Hunt",
+          "type": "webview"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "bugistan",
+          "title": "Bugistan",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Bugistan",
+      "properties": {
+        "bugistan.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable/Disable bug spawning"
+        },
+        "bugistan.bugSpeed": {
+          "type": "string",
+          "enum": ["slow", "medium", "fast", "pakistani"],
+          "default": "medium",
+          "description": "Bug speed"
+        },
+        "bugistan.maxBugs": {
+          "type": "number",
+          "default": 5,
+          "description": "Maximum bugs on screen"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "webpack",
+    "watch": "webpack --watch",
+    "package": "webpack --mode production",
+    "lint": "eslint src"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/node": "20.x",
+    "typescript": "^5.7.3",
+    "ts-loader": "^9.5.1",
+    "webpack": "^5.95.0",
+    "webpack-cli": "^5.1.4",
+    "eslint": "^9.19.0"
+  },
+  "dependencies": {
+    "sound-play": "^1.1.0"
+  }
+}
