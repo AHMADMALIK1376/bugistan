@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
@@ -149,15 +149,15 @@ for (let i = 0; i < 6; i++) {
 }
 
 // ============================================================
-// BUG TYPES (canFly added)
+// BUG TYPES
 // ============================================================
 const bugTypes = [
-    { name: 'Jewel Beetle', size: 15, speed: 1.1,  canFly: false },
-    { name: 'Ladybug',      size: 13, speed: 0.95, canFly: true  },
-    { name: 'Fire Ant',     size: 10, speed: 1.8,  canFly: false },
-    { name: 'Tarantula',    size: 17, speed: 0.65, canFly: false },
-    { name: 'Caterpillar',  size: 12, speed: 0.55, canFly: false },
-    { name: 'Dragonfly',    size: 14, speed: 2.2,  canFly: true  },
+    { name: 'Jewel Beetle', size: 15, speed: 1.1 },
+    { name: 'Ladybug',      size: 13, speed: 0.95 },
+    { name: 'Fire Ant',     size: 10, speed: 1.8 },
+    { name: 'Tarantula',    size: 17, speed: 0.65 },
+    { name: 'Caterpillar',  size: 12, speed: 0.55 },
+    { name: 'Dragonfly',    size: 14, speed: 2.2 },
 ];
 
 // ============================================================
@@ -168,15 +168,10 @@ class Bug {
         this.type = type !== undefined ? type : Math.floor(Math.random() * bugTypes.length);
         this.bug = bugTypes[this.type];
         this.isWarning = isWarning || false;
-        this.canFly = this.bug.canFly || false;
         this.x = 30 + Math.random() * (W - 60);
-        if (this.canFly) {
-            this.y = 30 + Math.random() * (H * 0.5);
-        } else {
-            this.y = getGroundY(this.x) - 20 - Math.random() * 15;
-        }
+        this.y = 60 + Math.random() * (H - 100);
         this.vx = (Math.random() - 0.5) * this.bug.speed;
-        this.vy = this.canFly ? (Math.random() - 0.5) * this.bug.speed : 0;
+        this.vy = (Math.random() - 0.5) * this.bug.speed;
         this.size = this.isWarning ? this.bug.size * 0.7 + Math.random() * 3 : this.bug.size + Math.random() * 4;
         this.alive = true;
         this.legPhase = Math.random() * Math.PI * 2;
@@ -195,17 +190,10 @@ class Bug {
         if (fleeing) {
             this.fleeTimer = 25;
             this.vx -= (dx / dist) * 0.6;
-            if (this.canFly) this.vy -= (dy / dist) * 0.6;
+            this.vy -= (dy / dist) * 0.6;
         }
         if (this.fleeTimer > 0) this.fleeTimer--;
-        this.x += this.vx;
-        if (this.canFly) {
-            this.y += this.vy;
-        } else {
-            const groundY = getGroundY(this.x);
-            this.y = groundY - 10 - Math.sin(this.wobble) * 3;
-            this.vy = 0;
-        }
+        this.x += this.vx; this.y += this.vy;
         this.wobble += 0.06;
         this.legPhase += 0.28 * this.bug.speed;
         this.antennaPhase += 0.12;
@@ -213,16 +201,14 @@ class Bug {
         const spd = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
         if (spd > this.bug.speed * 2.5) { this.vx *= 0.88; this.vy *= 0.88; }
         if (this.x < 12 || this.x > W - 12) this.vx *= -1;
+        if (this.y < 52 || this.y > H - 28) this.vy *= -1;
         this.x = Math.max(12, Math.min(W - 12, this.x));
-        if (this.canFly) {
-            if (this.y < 25 || this.y > H * 0.6) this.vy *= -1;
-            this.y = Math.max(25, Math.min(H * 0.6, this.y));
-        }
+        this.y = Math.max(52, Math.min(H - 28, this.y));
         if (Math.random() < 0.006 && !fleeing) {
             this.vx = (Math.random() - 0.5) * this.bug.speed;
-            if (this.canFly) this.vy = (Math.random() - 0.5) * this.bug.speed;
+            this.vy = (Math.random() - 0.5) * this.bug.speed;
         }
-        if ((this.type === 5 && this.canFly) || fleeing) {
+        if (this.type === 5 || fleeing) {
             this.trail.push({ x: this.x, y: this.y, a: 0.35 });
             if (this.trail.length > 6) this.trail.shift();
             for (let t of this.trail) t.a -= 0.04;
@@ -231,6 +217,7 @@ class Bug {
 
     draw(ctx) {
         if (!this.alive) return;
+        // Motion trail
         for (let t of this.trail) {
             ctx.save(); ctx.globalAlpha = Math.max(0, t.a);
             ctx.fillStyle = this.isWarning ? '#FFD040' : '#88FFAA';
@@ -243,16 +230,22 @@ class Bug {
         ctx.rotate(angle + Math.PI / 2);
         const bob = Math.sin(this.wobble) * 1.2;
         const fleeing = this.fleeTimer > 0;
+
+        // Shadow
         ctx.save(); ctx.rotate(-(angle + Math.PI / 2));
         ctx.fillStyle = 'rgba(0,0,0,0.22)';
         ctx.beginPath(); ctx.ellipse(0, s * 0.7, s * 0.9, s * 0.18, 0, 0, Math.PI * 2); ctx.fill();
         ctx.restore();
+
+        // Warning ring
         if (this.isWarning && !fleeing) {
             ctx.strokeStyle = 'rgba(255,200,0,0.6)'; ctx.lineWidth = 1.2;
             ctx.setLineDash([4, 3]);
             ctx.beginPath(); ctx.arc(0, bob, s * 1.45, 0, Math.PI * 2); ctx.stroke();
             ctx.setLineDash([]);
         }
+
+        // Draw bug body
         switch (this.type) {
             case 0: this._jewelBeetle(ctx, s, bob); break;
             case 1: this._ladybug(ctx, s, bob); break;
@@ -261,6 +254,8 @@ class Bug {
             case 4: this._caterpillar(ctx, s, bob); break;
             case 5: this._dragonfly(ctx, s, bob); break;
         }
+
+        // Flee halo
         if (fleeing) {
             ctx.strokeStyle = 'rgba(255,240,60,0.9)'; ctx.lineWidth = 2.5;
             ctx.beginPath(); ctx.arc(0, bob, s * 1.55, 0, Math.PI * 2); ctx.stroke();
@@ -276,6 +271,7 @@ class Bug {
         ctx.restore();
     }
 
+    // ─── JEWEL BEETLE ──────────────────────────────────────
     _jewelBeetle(ctx, s, bob) {
         const legPairs = [[-0.45,-0.3],[0,0],[0.45,0.3]];
         for (let side of [-1,1]) {
@@ -319,6 +315,7 @@ class Bug {
         ctx.fillStyle = '#FFEE00'; ctx.beginPath(); ctx.arc(s*0.5+Math.cos(this.antennaPhase)*s*0.3, bob-s*2.35, s*0.07, 0, Math.PI*2); ctx.fill();
     }
 
+    // ─── LADYBUG ────────────────────────────────────────────
     _ladybug(ctx, s, bob) {
         for (let side of [-1,1]) {
             for (let i = 0; i < 3; i++) {
@@ -351,6 +348,7 @@ class Bug {
         ctx.fillStyle = '#DD0000'; ctx.beginPath(); ctx.arc(s*0.35+Math.cos(this.antennaPhase)*s*0.1, bob-s*1.7, s*0.08, 0, Math.PI*2); ctx.fill();
     }
 
+    // ─── FIRE ANT ───────────────────────────────────────────
     _fireAnt(ctx, s, bob) {
         for (let side of [-1,1]) {
             for (let i = 0; i < 3; i++) {
@@ -387,6 +385,7 @@ class Bug {
         }
     }
 
+    // ─── TARANTULA ──────────────────────────────────────────
     _tarantula(ctx, s, bob) {
         const legAngles = [-2.2,-1.4,-0.6,0.2,Math.PI+2.2,Math.PI+1.4,Math.PI+0.6,Math.PI-0.2];
         for (let i = 0; i < 8; i++) {
@@ -430,6 +429,7 @@ class Bug {
         ctx.beginPath(); ctx.arc(s*0.14, bob-s*1.02, s*0.06, 0, Math.PI*2); ctx.fill();
     }
 
+    // ─── CATERPILLAR ────────────────────────────────────────
     _caterpillar(ctx, s, bob) {
         const segs = 7;
         const colors = ['#44AA22','#55CC33','#33991A','#66DD44','#33991A','#55CC33','#44AA22'];
@@ -473,6 +473,7 @@ class Bug {
         ctx.fillStyle = '#FFDD00'; ctx.beginPath(); ctx.arc(hx+s*0.25+Math.cos(this.antennaPhase)*s*0.12, hy-s*0.9, s*0.09, 0, Math.PI*2); ctx.fill();
     }
 
+    // ─── DRAGONFLY ──────────────────────────────────────────
     _dragonfly(ctx, s, bob) {
         const wFlap = Math.sin(this.wingPhase)*s*0.12;
         for (let pair of [{y:-0.1,len:1.8,wide:0.55},{y:0.35,len:1.5,wide:0.45}]) {
@@ -514,6 +515,7 @@ class Bug {
         ctx.fillStyle = 'rgba(100,220,255,0.25)'; ctx.beginPath(); ctx.arc(-s*0.06, bob-s*0.6, s*0.15, 0, Math.PI*2); ctx.fill();
     }
 
+    // ─── SQUISH ─────────────────────────────────────────────
     squish() {
         if (!this.alive) return;
         this.alive = false;
@@ -547,12 +549,14 @@ class Bug {
 // ============================================================
 function drawEnv() {
     const t = frame * 0.007;
+    // Sky
     const sky = ctx.createLinearGradient(0, 0, 0, H * 0.8);
     sky.addColorStop(0,'#FF4500'); sky.addColorStop(0.12,'#FF6B00');
     sky.addColorStop(0.28,'#FF9500'); sky.addColorStop(0.45,'#FFB347');
     sky.addColorStop(0.62,'#FFD580'); sky.addColorStop(0.78,'#FFE8A0');
     sky.addColorStop(1,'#FFF0C0');
     ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
+    // Sun
     const sunX = W * 0.5, sunY = H * 0.72;
     const sunHalo = ctx.createRadialGradient(sunX, sunY, 20, sunX, sunY, W * 0.55);
     sunHalo.addColorStop(0,'rgba(255,230,50,0.55)'); sunHalo.addColorStop(0.3,'rgba(255,140,0,0.25)');
@@ -574,12 +578,16 @@ function drawEnv() {
         ctx.lineTo(sunX + Math.cos(a)*len, sunY + Math.sin(a)*len); ctx.stroke();
     }
     ctx.restore();
+    // Clouds
     for (let cl of CLOUDS) { cl.rx += cl.speed / W; if (cl.rx > 1.2) cl.rx = -0.15; drawSunsetCloud(cl.rx * W, cl.y, cl.s, cl.alpha); }
+    // Hills
     ctx.save(); ctx.fillStyle = 'rgba(80,20,60,0.65)';
     drawHillShape([0,0.1,0.22,0.35,0.48,0.62,0.75,0.88,1],[0.78,0.68,0.75,0.65,0.74,0.64,0.73,0.67,0.78]); ctx.restore();
     ctx.save(); ctx.fillStyle = 'rgba(40,12,20,0.80)';
     drawHillShape([0,0.07,0.18,0.3,0.43,0.55,0.68,0.8,0.92,1],[0.82,0.74,0.80,0.72,0.81,0.73,0.79,0.74,0.81,0.82]); ctx.restore();
+    // Trees
     for (let td of [{rx:0.02,h:0.42},{rx:0.08,h:0.36},{rx:0.15,h:0.45},{rx:0.22,h:0.33},{rx:0.78,h:0.38},{rx:0.85,h:0.46},{rx:0.91,h:0.35},{rx:0.97,h:0.42}]) drawPineTree(td.rx*W, H*0.83, td.h*H);
+    // Ground
     ctx.save();
     const grd = ctx.createLinearGradient(0, H*0.76, 0, H);
     grd.addColorStop(0,'#2D5A0A'); grd.addColorStop(0.25,'#1E4006'); grd.addColorStop(0.6,'#142D04'); grd.addColorStop(1,'#0C1E02');
@@ -589,9 +597,11 @@ function drawEnv() {
     const grefl = ctx.createLinearGradient(0, H*0.76, 0, H*0.88);
     grefl.addColorStop(0,'rgba(255,160,30,0.22)'); grefl.addColorStop(1,'rgba(255,100,0,0)');
     ctx.fillStyle = grefl; ctx.fillRect(0, H*0.76, W, H*0.12); ctx.restore();
+    // Rocks
     ctx.fillStyle = 'rgba(80,45,10,0.4)';
     ctx.beginPath(); ctx.ellipse(W*0.2, H*0.85, 30, 8, 0.1, 0, Math.PI*2); ctx.fill();
     ctx.beginPath(); ctx.ellipse(W*0.72, H*0.87, 22, 6, -0.1, 0, Math.PI*2); ctx.fill();
+    // Grass
     for (let g of GRASS) {
         const baseY = H*0.8+Math.sin(g.x*0.05)*15;
         const sway = Math.sin(t*1.1+g.phase)*g.h*0.3+Math.sin(t*1.9+g.phase*1.3)*g.h*0.08;
@@ -606,6 +616,7 @@ function drawEnv() {
         ctx.beginPath(); ctx.moveTo(g.x, baseY);
         ctx.quadraticCurveTo(g.x+sway*0.4, baseY-g.h*0.5, g.x+sway, baseY-g.h); ctx.stroke();
     }
+    // Flowers
     for (let f of flowers) {
         const fx = f.rx*W, fy = f.rootY, sw = Math.sin(t*0.9+f.phase)*4, tx = fx+sw, ty = fy-f.stem;
         ctx.strokeStyle = '#2A5A0A'; ctx.lineWidth = 1.3;
@@ -617,6 +628,7 @@ function drawEnv() {
         ctx.fillStyle = f.pal.c; ctx.beginPath(); ctx.arc(tx, ty, f.size*0.28, 0, Math.PI*2); ctx.fill();
         ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.beginPath(); ctx.arc(tx-f.size*0.08, ty-f.size*0.08, f.size*0.08, 0, Math.PI*2); ctx.fill();
     }
+    // Sparkles
     for (let i = 0; i < 6; i++) {
         const mx = W*((Math.sin(t*0.3+i*1.7)*0.5+0.5)*0.6+0.2), my = H*(0.15+Math.sin(t*0.2+i*2.3)*0.3);
         const alpha = 0.3+0.4*Math.abs(Math.sin(t*1.2+i));
@@ -630,17 +642,32 @@ function drawSunsetCloud(x,y,s,alpha){ctx.save();ctx.globalAlpha=alpha*0.5;ctx.f
 function drawHillShape(xs,ys){ctx.beginPath();ctx.moveTo(0,H);for(let i=0;i<xs.length;i++){if(i===0)ctx.moveTo(xs[i]*W,ys[i]*H);else ctx.bezierCurveTo(xs[i-1]*W+(xs[i]-xs[i-1])*W*.5,ys[i-1]*H,xs[i]*W-(xs[i]-xs[i-1])*W*.5,ys[i]*H,xs[i]*W,ys[i]*H)}ctx.lineTo(W,H);ctx.closePath();ctx.fill()}
 function drawPineTree(x,gy,h){ctx.save();ctx.fillStyle='rgba(15,8,5,0.85)';ctx.fillRect(x-3,gy-h*.22,6,h*.22);for(let i=0;i<6;i++){const ty=gy-h*.18-(h*.82)*(i/6),tw=h*.18*(1-i/6*.65);ctx.beginPath();ctx.moveTo(x,ty-h*.18);ctx.lineTo(x+tw,ty);ctx.lineTo(x-tw,ty);ctx.closePath();ctx.fill()}ctx.restore()}
 
+// ============================================================
+// PARTICLES
+// ============================================================
 function updateParticles(){for(let p of particles){p.x+=p.vx;p.y+=p.vy;if(!p.isSplat)p.vy+=0.1;p.life-=0.025}particles=particles.filter(p=>p.life>0)}
 function drawParticles(){for(let p of particles){ctx.save();ctx.globalAlpha=p.life;ctx.fillStyle=p.color;if(p.isSplat){ctx.beginPath();ctx.ellipse(p.x,p.y,p.size*2,p.size*.5,0,0,Math.PI*2);ctx.fill()}else{ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);ctx.fill()}ctx.restore()}}
 
+// ============================================================
+// COUNTS
+// ============================================================
 function updateCountDisplay(){errCountEl.textContent=errorTarget;warnCountEl.textContent=warningTarget}
 function setTargets(errors,warnings){errorTarget=errors;warningTarget=warnings;const tot=errors+warnings;bugs=bugs.filter(b=>b.alive);while(bugs.length>tot){const b=bugs.pop();if(b)b.alive=false}while(bugs.length<tot)bugs.push(new Bug(undefined,bugs.length>=errors));updateCountDisplay()}
 
+// ============================================================
+// GAME LOOP
+// ============================================================
 function gameLoop(){frame++;if(comboTimer>0){comboTimer--;if(!comboTimer){combo=0;comboEl.textContent='0'}}updateParticles();ctx.clearRect(0,0,W,H);drawEnv();for(let b of bugs){b.update();b.draw(ctx)}drawParticles();requestAnimationFrame(gameLoop)}
 
+// ============================================================
+// EVENTS
+// ============================================================
 canvas.addEventListener('click',e=>{const r=canvas.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;for(let i=bugs.length-1;i>=0;i--){if(bugs[i].alive&&bugs[i].contains(mx,my)){bugs[i].squish();break}}});
 window.addEventListener('message',e=>{if(e.data.command==='setTargets')setTargets(e.data.errors,e.data.warnings)});
 
+// ============================================================
+// BOOT
+// ============================================================
 resize();
 try{const vscode=acquireVsCodeApi();vscode.postMessage({command:'ready'});}catch(e){}
 gameLoop();
