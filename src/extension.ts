@@ -26,8 +26,27 @@ class GameViewProvider implements vscode.WebviewViewProvider {
     // ----------------------------------------------------------
     resolveWebviewView(webviewView: vscode.WebviewView) {
         this._view = webviewView;
-        webviewView.webview.options = { enableScripts: true };
-        webviewView.webview.html = this.getGardenHTML();
+
+        const srcDir = vscode.Uri.file(path.join(__dirname, '..', 'src'));
+        const bugsDir = vscode.Uri.file(path.join(__dirname, '..', 'src', 'bugs'));
+
+        webviewView.webview.options = {
+            enableScripts: true,
+            localResourceRoots: [srcDir, bugsDir]
+        };
+
+        // Get HTML content
+        let html = this.getGardenHTML();
+
+        // Replace bug script paths with proper webview URIs
+        const bugFiles = ['beetle.js', 'ladybug.js', 'fire-ant.js', 'spider.js', 'caterpillar.js', 'dragonfly.js', 'bug-registry.js'];
+        for (const file of bugFiles) {
+            const bugUri = vscode.Uri.joinPath(bugsDir, file);
+            const webviewUri = webviewView.webview.asWebviewUri(bugUri);
+            html = html.replace(`bugs/${file}`, webviewUri.toString());
+        }
+
+        webviewView.webview.html = html;
 
         // Listen for messages from the webview (game)
         webviewView.webview.onDidReceiveMessage(msg => {
@@ -73,12 +92,12 @@ class GameViewProvider implements vscode.WebviewViewProvider {
     private getFallbackHTML(): string {
         return `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{width:100%;height:100vh;overflow:hidden;background:#2d5a1e;display:flex;justify-content:center;align-items:center;color:#ffd700;font-family:Segoe UI,sans-serif;font-size:18px}
+html,body{width:100%;height:100vh;overflow:hidden;background:#1e1e1e;display:flex;justify-content:center;align-items:center;color:#ffd700;font-family:Segoe UI,sans-serif;font-size:18px}
 </style></head><body>
 <div style="text-align:center">
-    <div style="font-size:50px">🌿</div>
+    <div style="font-size:50px">🐛</div>
     <div>Bug Garden Loading...</div>
-    <div style="font-size:12px;color:#aaa">Create src/garden.html</div>
+    <div style="font-size:12px;color:#aaa">Check src/garden.html and src/bugs/</div>
 </div>
 </body></html>`;
     }
