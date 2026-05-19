@@ -12,11 +12,19 @@
         }
         #area { display: flex; flex-direction: column; width: 100%; height: 100%; }
         #hdr {
-            text-align: center; padding: 7px 12px;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 7px 12px;
             background: #2d2d2d;
             color: #FFD080; font-size: 13px; font-weight: bold; letter-spacing: 4px;
             border-bottom: 2px solid #FF6600; z-index: 10;
         }
+        #hdr .title { flex: 1; text-align: center; }
+        #bgSelector {
+            background: #3a3a3a; color: #FFE0A0; border: 1px solid #555;
+            padding: 3px 8px; border-radius: 4px; font-size: 11px;
+            cursor: pointer; font-family: 'Georgia', serif;
+        }
+        #bgSelector:hover { background: #4a4a4a; }
         #info {
             text-align: center; padding: 4px 8px; font-size: 10px;
             color: #FFE0A0; background: #252525;
@@ -29,7 +37,18 @@
 </head>
 <body>
 <div id="area">
-    <div id="hdr">🪵 MUD GROUND 🩴</div>
+    <div id="hdr">
+        <span></span>
+        <span class="title">🐛 BUG HUNT 🩴</span>
+        <select id="bgSelector">
+            <option value="mud">🪵 Mud Ground</option>
+            <option value="grass">🌿 Grass Field</option>
+            <option value="night">🌙 Night Sky</option>
+            <option value="desert">🏜️ Desert Sand</option>
+            <option value="ocean">🌊 Ocean Deep</option>
+            <option value="space">🚀 Space</option>
+        </select>
+    </div>
     <div id="info">
         <span class="red">🔴 Errors: <b id="errCount">0</b></span> |
         <span class="yellow">🟡 Warnings: <b id="warnCount">0</b></span> |
@@ -53,12 +72,18 @@ const errCountEl = document.getElementById('errCount');
 const warnCountEl = document.getElementById('warnCount');
 const kc = document.getElementById('kc');
 const comboEl = document.getElementById('combo');
+const bgSelector = document.getElementById('bgSelector');
 
 let W, H, frame = 0;
 let mouse = { x: -999, y: -999 };
 let bugs = [], killed = 0;
 let errorTarget = 0, warningTarget = 0;
 let combo = 0, comboTimer = 0, particles = [];
+let currentBackground = 'mud'; // Default background
+
+bgSelector.addEventListener('change', () => {
+    currentBackground = bgSelector.value;
+});
 
 function resize() { W = canvas.width = canvas.clientWidth; H = canvas.height = canvas.clientHeight; }
 window.addEventListener('resize', resize);
@@ -112,8 +137,11 @@ class Bug {
         ctx.rotate(angle + Math.PI / 2);
         const bob = Math.sin(this.wobble) * 1.2, fleeing = this.fleeTimer > 0;
         ctx.save(); ctx.rotate(-(angle + Math.PI / 2));
-        ctx.fillStyle = 'rgba(0,0,0,0.3)';
-        ctx.beginPath(); ctx.ellipse(0, s * 0.7, s * 0.9, s * 0.18, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+        ctx.fillStyle = 'rgba(0,0,0,0.5)';
+        ctx.beginPath(); ctx.ellipse(0, s * 0.7, s * 0.9, s * 0.18, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,200,0.15)';
+        ctx.beginPath(); ctx.ellipse(0, 0, s * 1.3, s * 1.3, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
         if (this.isWarning && !fleeing) { ctx.strokeStyle = 'rgba(255,200,0,0.6)'; ctx.lineWidth = 1.2; ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.arc(0, bob, s * 1.45, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]); }
         if (this.bug.draw) { this.bug.draw(ctx, s, bob, this); }
         if (fleeing) { ctx.strokeStyle = 'rgba(255,240,60,0.9)'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(0, bob, s * 1.55, 0, Math.PI * 2); ctx.stroke(); for (let i = 0; i < 4; i++) { const a = i * Math.PI / 2; ctx.strokeStyle = 'rgba(255,255,120,0.5)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(Math.cos(a) * s * 1.6, Math.sin(a) * s * 1.6 + bob); ctx.lineTo(Math.cos(a) * s * 2.2, Math.sin(a) * s * 2.2 + bob); ctx.stroke(); } }
@@ -131,49 +159,148 @@ class Bug {
 }
 
 // ============================================================
-// MUDDY BACKGROUND - Top to Bottom
+// BACKGROUND THEMES
 // ============================================================
 function drawEnv() {
-    const t = frame * 0.005;
-    
-    // Full muddy gradient from top to bottom
-    const mud = ctx.createLinearGradient(0, 0, 0, H);
-    mud.addColorStop(0, '#5C3D1A');
-    mud.addColorStop(0.2, '#6B4F28');
-    mud.addColorStop(0.4, '#7A5C30');
-    mud.addColorStop(0.6, '#6B4F28');
-    mud.addColorStop(0.8, '#4A3508');
-    mud.addColorStop(1, '#3A2805');
-    ctx.fillStyle = mud;
-    ctx.fillRect(0, 0, W, H);
-    
-    // Subtle mud texture dots
-    for (let i = 0; i < 50; i++) {
-        const sx = (Math.sin(i * 12.7 + t) * 0.5 + 0.5) * W;
-        const sy = (Math.cos(i * 7.3 + t * 0.7) * 0.5 + 0.5) * H;
-        ctx.fillStyle = `rgba(0,0,0,${0.03 + Math.sin(i + t) * 0.02})`;
-        ctx.beginPath(); ctx.arc(sx, sy, 2 + Math.random() * 3, 0, Math.PI * 2); ctx.fill();
+    switch (currentBackground) {
+        case 'mud': drawMudBackground(); break;
+        case 'grass': drawGrassBackground(); break;
+        case 'night': drawNightBackground(); break;
+        case 'desert': drawDesertBackground(); break;
+        case 'ocean': drawOceanBackground(); break;
+        case 'space': drawSpaceBackground(); break;
+        default: drawMudBackground();
     }
-    
-    // Dark mud patches
-    ctx.fillStyle = 'rgba(30, 15, 5, 0.25)';
-    ctx.beginPath(); ctx.ellipse(W * 0.2, H * 0.3, 60, 20, 0.1, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(W * 0.65, H * 0.5, 50, 15, -0.1, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(W * 0.4, H * 0.75, 70, 18, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(W * 0.8, H * 0.2, 40, 12, 0.2, 0, Math.PI * 2); ctx.fill();
-    
-    // Light mud highlights
-    ctx.fillStyle = 'rgba(120, 90, 50, 0.15)';
-    ctx.beginPath(); ctx.ellipse(W * 0.5, H * 0.15, 55, 14, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(W * 0.3, H * 0.6, 45, 12, 0.1, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(W * 0.75, H * 0.7, 50, 13, -0.1, 0, Math.PI * 2); ctx.fill();
-    
-    // Small pebbles/rocks
+}
+
+// ── MUD GROUND ─────────────────────────────────────────────
+function drawMudBackground() {
+    const t = frame * 0.005;
+    const mud = ctx.createLinearGradient(0, 0, 0, H);
+    mud.addColorStop(0, '#7A5C3A'); mud.addColorStop(0.3, '#8B6B48');
+    mud.addColorStop(0.6, '#6B4F28'); mud.addColorStop(1, '#4A3508');
+    ctx.fillStyle = mud; ctx.fillRect(0, 0, W, H);
+    for (let i = 0; i < 20; i++) {
+        const dx = (Math.sin(i * 3.7 + t * 0.4) * 0.5 + 0.5) * W;
+        const dy = (Math.cos(i * 5.1 + t * 0.3) * 0.5 + 0.5) * H;
+        ctx.fillStyle = `rgba(180,150,100,${0.1 + Math.sin(i + t * 2) * 0.06})`;
+        ctx.beginPath(); ctx.arc(dx, dy, 2, 0, Math.PI * 2); ctx.fill();
+    }
+}
+
+// ── GRASS FIELD ────────────────────────────────────────────
+function drawGrassBackground() {
+    const t = frame * 0.005;
+    const sky = ctx.createLinearGradient(0, 0, 0, H);
+    sky.addColorStop(0, '#87CEEB'); sky.addColorStop(0.6, '#B0E57C'); sky.addColorStop(1, '#4A8C2A');
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
+    // Grass blades
+    for (let i = 0; i < 60; i++) {
+        const gx = (i / 60) * W;
+        const gh = 15 + Math.sin(i * 3) * 20;
+        const sway = Math.sin(t * 0.8 + i) * gh * 0.3;
+        ctx.strokeStyle = `rgba(${40 + i % 30},${100 + i % 40},${20 + i % 20},0.6)`;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(gx, H); ctx.lineTo(gx + sway, H - gh);
+        ctx.stroke();
+    }
+    // Floating pollen
     for (let i = 0; i < 15; i++) {
-        const rx = ((i * 7 + 3) % 100) / 100 * W;
-        const ry = ((i * 13 + 5) % 100) / 100 * H;
-        ctx.fillStyle = 'rgba(80, 60, 35, 0.4)';
-        ctx.beginPath(); ctx.ellipse(rx, ry, 3 + (i % 4), 2 + (i % 3), i * 0.5, 0, Math.PI * 2); ctx.fill();
+        const px = (Math.sin(i * 2.5 + t * 0.3) * 0.5 + 0.5) * W;
+        const py = (Math.cos(i * 3.5 + t * 0.4) * 0.5 + 0.5) * H;
+        ctx.fillStyle = 'rgba(255,255,150,0.3)';
+        ctx.beginPath(); ctx.arc(px, py, 1.5, 0, Math.PI * 2); ctx.fill();
+    }
+}
+
+// ── NIGHT SKY ──────────────────────────────────────────────
+function drawNightBackground() {
+    const t = frame * 0.005;
+    const sky = ctx.createLinearGradient(0, 0, 0, H);
+    sky.addColorStop(0, '#0a0a2e'); sky.addColorStop(0.5, '#1a1a3e'); sky.addColorStop(1, '#0d1b2a');
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
+    // Stars
+    for (let i = 0; i < 80; i++) {
+        const sx = (Math.sin(i * 13.7) * 0.5 + 0.5) * W;
+        const sy = (Math.cos(i * 17.3) * 0.5 + 0.5) * H * 0.7;
+        const twinkle = 0.3 + Math.sin(t * 2 + i) * 0.4;
+        ctx.fillStyle = `rgba(255,255,220,${twinkle})`;
+        ctx.beginPath(); ctx.arc(sx, sy, 0.5 + Math.abs(Math.sin(t + i)) * 1.5, 0, Math.PI * 2); ctx.fill();
+    }
+    // Moon
+    ctx.fillStyle = '#FFEECC';
+    ctx.beginPath(); ctx.arc(W * 0.8, H * 0.2, 35, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#0a0a2e';
+    ctx.beginPath(); ctx.arc(W * 0.82, H * 0.18, 30, 0, Math.PI * 2); ctx.fill();
+}
+
+// ── DESERT SAND ────────────────────────────────────────────
+function drawDesertBackground() {
+    const t = frame * 0.005;
+    const sky = ctx.createLinearGradient(0, 0, 0, H);
+    sky.addColorStop(0, '#FF8C42'); sky.addColorStop(0.4, '#FFB347'); sky.addColorStop(1, '#F5DEB3');
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
+    // Sand dunes
+    ctx.fillStyle = '#E8C872';
+    ctx.beginPath(); ctx.moveTo(0, H);
+    for (let i = 0; i <= W; i += 20) {
+        ctx.lineTo(i, H * 0.5 + Math.sin(i * 0.01 + t) * 30);
+    }
+    ctx.lineTo(W, H); ctx.closePath(); ctx.fill();
+    // Sand particles
+    for (let i = 0; i < 25; i++) {
+        const sx = (Math.sin(i * 4.5 + t * 0.5) * 0.5 + 0.5) * W;
+        const sy = H * 0.3 + (Math.cos(i * 3.5) * 0.5 + 0.5) * H * 0.5;
+        ctx.fillStyle = 'rgba(210,180,140,0.3)';
+        ctx.beginPath(); ctx.arc(sx, sy, 2, 0, Math.PI * 2); ctx.fill();
+    }
+}
+
+// ── OCEAN DEEP ─────────────────────────────────────────────
+function drawOceanBackground() {
+    const t = frame * 0.005;
+    const ocean = ctx.createLinearGradient(0, 0, 0, H);
+    ocean.addColorStop(0, '#006994'); ocean.addColorStop(0.3, '#004466'); ocean.addColorStop(1, '#001a33');
+    ctx.fillStyle = ocean; ctx.fillRect(0, 0, W, H);
+    // Light rays
+    for (let i = 0; i < 8; i++) {
+        const rx = W * (0.1 + i * 0.1);
+        ctx.fillStyle = `rgba(100,180,255,${0.03 + Math.sin(t + i) * 0.02})`;
+        ctx.beginPath(); ctx.moveTo(rx, 0); ctx.lineTo(rx + 30, H); ctx.lineTo(rx - 20, H); ctx.closePath(); ctx.fill();
+    }
+    // Bubbles
+    for (let i = 0; i < 20; i++) {
+        const bx = (Math.sin(i * 3.2 + t * 0.2) * 0.5 + 0.5) * W;
+        const by = H - ((frame * 0.2 + i * 40) % H);
+        ctx.fillStyle = 'rgba(150,220,255,0.2)';
+        ctx.beginPath(); ctx.arc(bx, by, 2 + Math.sin(i + t) * 1.5, 0, Math.PI * 2); ctx.fill();
+    }
+}
+
+// ── SPACE ──────────────────────────────────────────────────
+function drawSpaceBackground() {
+    const t = frame * 0.005;
+    const space = ctx.createLinearGradient(0, 0, 0, H);
+    space.addColorStop(0, '#000011'); space.addColorStop(0.5, '#0a0a2a'); space.addColorStop(1, '#050510');
+    ctx.fillStyle = space; ctx.fillRect(0, 0, W, H);
+    // Stars
+    for (let i = 0; i < 120; i++) {
+        const sx = (Math.sin(i * 7.7 + i * i * 0.1) * 0.5 + 0.5) * W;
+        const sy = (Math.cos(i * 11.3 + i * i * 0.05) * 0.5 + 0.5) * H;
+        const twinkle = 0.3 + Math.sin(t * 3 + i) * 0.5;
+        ctx.fillStyle = `rgba(255,255,255,${twinkle})`;
+        ctx.beginPath(); ctx.arc(sx, sy, 0.3 + Math.abs(Math.sin(t * 2 + i)) * 1.2, 0, Math.PI * 2); ctx.fill();
+    }
+    // Nebula
+    for (let i = 0; i < 4; i++) {
+        const nx = W * (0.2 + i * 0.2);
+        const ny = H * (0.3 + i * 0.1);
+        const ng = ctx.createRadialGradient(nx, ny, 0, nx, ny, 100);
+        ng.addColorStop(0, `rgba(${100 + i * 30},${50 + i * 20},${200 - i * 30},0.08)`);
+        ng.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = ng;
+        ctx.beginPath(); ctx.arc(nx, ny, 100, 0, Math.PI * 2); ctx.fill();
     }
 }
 
