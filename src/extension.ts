@@ -29,14 +29,27 @@ class GameViewProvider implements vscode.WebviewViewProvider {
 
         const srcDir = vscode.Uri.file(path.join(__dirname, '..', 'src'));
         const bugsDir = vscode.Uri.file(path.join(__dirname, '..', 'src', 'bugs'));
+        const backgroundsDir = vscode.Uri.file(path.join(__dirname, '..', 'src', 'backgrounds'));
 
         webviewView.webview.options = {
             enableScripts: true,
-            localResourceRoots: [srcDir, bugsDir]
+            localResourceRoots: [srcDir, bugsDir, backgroundsDir]
         };
 
         // Get HTML content
         let html = this.getGardenHTML();
+
+        // Resolve background files
+        const bgFolderPath = path.join(__dirname, '..', 'src', 'backgrounds');
+        if (fs.existsSync(bgFolderPath)) {
+            const bgFiles = fs.readdirSync(bgFolderPath).filter(f => f.endsWith('.js'));
+            for (const file of bgFiles) {
+                const searchStr = `backgrounds/${file}`;
+                const fileUri = vscode.Uri.file(path.join(bgFolderPath, file));
+                const webviewUri = webviewView.webview.asWebviewUri(fileUri);
+                html = html.replace(searchStr, webviewUri.toString());
+            }
+        }
 
         // Replace ALL theme folder script paths with proper webview URIs
         const themeFolders = ['mud', 'grass', 'night', 'desert', 'ocean', 'space'];
@@ -110,7 +123,7 @@ html,body{width:100%;height:100vh;overflow:hidden;background:#1e1e1e;display:fle
 <div style="text-align:center">
     <div style="font-size:50px">🐛</div>
     <div>Bug Garden Loading...</div>
-    <div style="font-size:12px;color:#aaa">Check src/garden.html and src/bugs/</div>
+    <div style="font-size:12px;color:#aaa">Check src/garden.html, src/bugs/ and src/backgrounds/</div>
 </div>
 </body></html>`;
     }

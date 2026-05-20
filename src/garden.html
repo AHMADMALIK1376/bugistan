@@ -57,7 +57,15 @@
     <canvas id="c"></canvas>
 </div>
 
-<!-- MUD THEME -->
+<!-- BACKGROUNDS -->
+<script src="backgrounds/mud.js"></script>
+<script src="backgrounds/grass.js"></script>
+<script src="backgrounds/night.js"></script>
+<script src="backgrounds/desert.js"></script>
+<script src="backgrounds/ocean.js"></script>
+<script src="backgrounds/space.js"></script>
+
+<!-- MUD THEME CREATURES -->
 <script src="bugs/mud/mud-dauber.js"></script>
 <script src="bugs/mud/mayfly.js"></script>
 <script src="bugs/mud/dragonfly.js"></script>
@@ -66,7 +74,7 @@
 <script src="bugs/mud/crane-fly.js"></script>
 <script src="bugs/mud/marsh-beetle.js"></script>
 
-<!-- GRASS THEME -->
+<!-- GRASS THEME CREATURES -->
 <script src="bugs/grass/grasshopper.js"></script>
 <script src="bugs/grass/beetle.js"></script>
 <script src="bugs/grass/ladybug.js"></script>
@@ -75,7 +83,7 @@
 <script src="bugs/grass/flea.js"></script>
 <script src="bugs/grass/leafhopper.js"></script>
 
-<!-- NIGHT THEME -->
+<!-- NIGHT THEME CREATURES -->
 <script src="bugs/night/moth.js"></script>
 <script src="bugs/night/firefly.js"></script>
 <script src="bugs/night/spider.js"></script>
@@ -83,7 +91,7 @@
 <script src="bugs/night/glowworm.js"></script>
 <script src="bugs/night/mosquito.js"></script>
 
-<!-- DESERT THEME -->
+<!-- DESERT THEME CREATURES -->
 <script src="bugs/desert/namib-beetle.js"></script>
 <script src="bugs/desert/silver-ant.js"></script>
 <script src="bugs/desert/desert-locust.js"></script>
@@ -93,7 +101,7 @@
 <script src="bugs/desert/antlion.js"></script>
 <script src="bugs/desert/sand-wasp.js"></script>
 
-<!-- OCEAN THEME -->
+<!-- OCEAN THEME CREATURES -->
 <script src="bugs/ocean/fish.js"></script>
 <script src="bugs/ocean/jellyfish.js"></script>
 <script src="bugs/ocean/crab.js"></script>
@@ -101,7 +109,7 @@
 <script src="bugs/ocean/turtle.js"></script>
 <script src="bugs/ocean/shark.js"></script>
 
-<!-- SPACE THEME -->
+<!-- SPACE THEME CREATURES -->
 <script src="bugs/space/alien.js"></script>
 <script src="bugs/space/robot-bug.js"></script>
 <script src="bugs/space/ufo.js"></script>
@@ -129,7 +137,6 @@ let currentBackground = 'mud';
 bgSelector.addEventListener('change', () => {
     currentBackground = bgSelector.value;
     setTheme(currentBackground);
-    // Clear all bugs and respawn with new theme creatures
     bugs.forEach(b => b.alive = false);
     bugs = [];
     const tot = errorTarget + warningTarget;
@@ -213,7 +220,7 @@ class Bug {
 }
 
 // ============================================================
-// BACKGROUND THEMES
+// BACKGROUND SELECTOR
 // ============================================================
 function drawEnv() {
     switch (currentBackground) {
@@ -224,116 +231,6 @@ function drawEnv() {
         case 'ocean': drawOceanBackground(); break;
         case 'space': drawSpaceBackground(); break;
         default: drawMudBackground();
-    }
-}
-
-function drawMudBackground() {
-    const t = frame * 0.005;
-    const mud = ctx.createLinearGradient(0, 0, 0, H);
-    mud.addColorStop(0, '#7A5C3A'); mud.addColorStop(0.3, '#8B6B48');
-    mud.addColorStop(0.6, '#6B4F28'); mud.addColorStop(1, '#4A3508');
-    ctx.fillStyle = mud; ctx.fillRect(0, 0, W, H);
-    for (let i = 0; i < 20; i++) {
-        const dx = (Math.sin(i * 3.7 + t * 0.4) * 0.5 + 0.5) * W;
-        const dy = (Math.cos(i * 5.1 + t * 0.3) * 0.5 + 0.5) * H;
-        ctx.fillStyle = `rgba(180,150,100,${0.1 + Math.sin(i + t * 2) * 0.06})`;
-        ctx.beginPath(); ctx.arc(dx, dy, 2, 0, Math.PI * 2); ctx.fill();
-    }
-}
-
-function drawGrassBackground() {
-    const t = frame * 0.005;
-    const sky = ctx.createLinearGradient(0, 0, 0, H);
-    sky.addColorStop(0, '#87CEEB'); sky.addColorStop(0.6, '#B0E57C'); sky.addColorStop(1, '#4A8C2A');
-    ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
-    for (let i = 0; i < 60; i++) {
-        const gx = (i / 60) * W; const gh = 15 + Math.sin(i * 3) * 20;
-        const sway = Math.sin(t * 0.8 + i) * gh * 0.3;
-        ctx.strokeStyle = `rgba(${40 + i % 30},${100 + i % 40},${20 + i % 20},0.6)`;
-        ctx.lineWidth = 1.5;
-        ctx.beginPath(); ctx.moveTo(gx, H); ctx.lineTo(gx + sway, H - gh); ctx.stroke();
-    }
-    for (let i = 0; i < 15; i++) {
-        const px = (Math.sin(i * 2.5 + t * 0.3) * 0.5 + 0.5) * W;
-        const py = (Math.cos(i * 3.5 + t * 0.4) * 0.5 + 0.5) * H;
-        ctx.fillStyle = 'rgba(255,255,150,0.3)';
-        ctx.beginPath(); ctx.arc(px, py, 1.5, 0, Math.PI * 2); ctx.fill();
-    }
-}
-
-function drawNightBackground() {
-    const t = frame * 0.005;
-    const sky = ctx.createLinearGradient(0, 0, 0, H);
-    sky.addColorStop(0, '#0a0a2e'); sky.addColorStop(0.5, '#1a1a3e'); sky.addColorStop(1, '#0d1b2a');
-    ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
-    for (let i = 0; i < 80; i++) {
-        const sx = (Math.sin(i * 13.7) * 0.5 + 0.5) * W;
-        const sy = (Math.cos(i * 17.3) * 0.5 + 0.5) * H * 0.7;
-        const twinkle = 0.3 + Math.sin(t * 2 + i) * 0.4;
-        ctx.fillStyle = `rgba(255,255,220,${twinkle})`;
-        ctx.beginPath(); ctx.arc(sx, sy, 0.5 + Math.abs(Math.sin(t + i)) * 1.5, 0, Math.PI * 2); ctx.fill();
-    }
-    ctx.fillStyle = '#FFEECC';
-    ctx.beginPath(); ctx.arc(W * 0.8, H * 0.2, 35, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#0a0a2e';
-    ctx.beginPath(); ctx.arc(W * 0.82, H * 0.18, 30, 0, Math.PI * 2); ctx.fill();
-}
-
-function drawDesertBackground() {
-    const t = frame * 0.005;
-    const sky = ctx.createLinearGradient(0, 0, 0, H);
-    sky.addColorStop(0, '#FF8C42'); sky.addColorStop(0.4, '#FFB347'); sky.addColorStop(1, '#F5DEB3');
-    ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
-    ctx.fillStyle = '#E8C872';
-    ctx.beginPath(); ctx.moveTo(0, H);
-    for (let i = 0; i <= W; i += 20) { ctx.lineTo(i, H * 0.5 + Math.sin(i * 0.01 + t) * 30); }
-    ctx.lineTo(W, H); ctx.closePath(); ctx.fill();
-    for (let i = 0; i < 25; i++) {
-        const sx = (Math.sin(i * 4.5 + t * 0.5) * 0.5 + 0.5) * W;
-        const sy = H * 0.3 + (Math.cos(i * 3.5) * 0.5 + 0.5) * H * 0.5;
-        ctx.fillStyle = 'rgba(210,180,140,0.3)';
-        ctx.beginPath(); ctx.arc(sx, sy, 2, 0, Math.PI * 2); ctx.fill();
-    }
-}
-
-function drawOceanBackground() {
-    const t = frame * 0.005;
-    const ocean = ctx.createLinearGradient(0, 0, 0, H);
-    ocean.addColorStop(0, '#006994'); ocean.addColorStop(0.3, '#004466'); ocean.addColorStop(1, '#001a33');
-    ctx.fillStyle = ocean; ctx.fillRect(0, 0, W, H);
-    for (let i = 0; i < 8; i++) {
-        const rx = W * (0.1 + i * 0.1);
-        ctx.fillStyle = `rgba(100,180,255,${0.03 + Math.sin(t + i) * 0.02})`;
-        ctx.beginPath(); ctx.moveTo(rx, 0); ctx.lineTo(rx + 30, H); ctx.lineTo(rx - 20, H); ctx.closePath(); ctx.fill();
-    }
-    for (let i = 0; i < 20; i++) {
-        const bx = (Math.sin(i * 3.2 + t * 0.2) * 0.5 + 0.5) * W;
-        const by = H - ((frame * 0.2 + i * 40) % H);
-        ctx.fillStyle = 'rgba(150,220,255,0.2)';
-        ctx.beginPath(); ctx.arc(bx, by, 2 + Math.sin(i + t) * 1.5, 0, Math.PI * 2); ctx.fill();
-    }
-}
-
-function drawSpaceBackground() {
-    const t = frame * 0.005;
-    const space = ctx.createLinearGradient(0, 0, 0, H);
-    space.addColorStop(0, '#000011'); space.addColorStop(0.5, '#0a0a2a'); space.addColorStop(1, '#050510');
-    ctx.fillStyle = space; ctx.fillRect(0, 0, W, H);
-    for (let i = 0; i < 120; i++) {
-        const sx = (Math.sin(i * 7.7 + i * i * 0.1) * 0.5 + 0.5) * W;
-        const sy = (Math.cos(i * 11.3 + i * i * 0.05) * 0.5 + 0.5) * H;
-        const twinkle = 0.3 + Math.sin(t * 3 + i) * 0.5;
-        ctx.fillStyle = `rgba(255,255,255,${twinkle})`;
-        ctx.beginPath(); ctx.arc(sx, sy, 0.3 + Math.abs(Math.sin(t * 2 + i)) * 1.2, 0, Math.PI * 2); ctx.fill();
-    }
-    for (let i = 0; i < 4; i++) {
-        const nx = W * (0.2 + i * 0.2);
-        const ny = H * (0.3 + i * 0.1);
-        const ng = ctx.createRadialGradient(nx, ny, 0, nx, ny, 100);
-        ng.addColorStop(0, `rgba(${100 + i * 30},${50 + i * 20},${200 - i * 30},0.08)`);
-        ng.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.fillStyle = ng;
-        ctx.beginPath(); ctx.arc(nx, ny, 100, 0, Math.PI * 2); ctx.fill();
     }
 }
 
