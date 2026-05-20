@@ -57,13 +57,58 @@
     <canvas id="c"></canvas>
 </div>
 
-<script src="bugs/beetle.js"></script>
-<script src="bugs/ladybug.js"></script>
-<script src="bugs/fire-ant.js"></script>
-<script src="bugs/spider.js"></script>
-<script src="bugs/caterpillar.js"></script>
-<script src="bugs/dragonfly.js"></script>
-<script src="bugs/bug-registry.js"></script>
+<!-- MUD THEME -->
+<script src="bugs/mud/mud-dauber.js"></script>
+<script src="bugs/mud/mayfly.js"></script>
+<script src="bugs/mud/dragonfly.js"></script>
+<script src="bugs/mud/mole-cricket.js"></script>
+<script src="bugs/mud/water-scorpion.js"></script>
+<script src="bugs/mud/crane-fly.js"></script>
+<script src="bugs/mud/marsh-beetle.js"></script>
+
+<!-- GRASS THEME -->
+<script src="bugs/grass/grasshopper.js"></script>
+<script src="bugs/grass/beetle.js"></script>
+<script src="bugs/grass/ladybug.js"></script>
+<script src="bugs/grass/caterpillar.js"></script>
+<script src="bugs/grass/armyworm.js"></script>
+<script src="bugs/grass/flea.js"></script>
+<script src="bugs/grass/leafhopper.js"></script>
+
+<!-- NIGHT THEME -->
+<script src="bugs/night/moth.js"></script>
+<script src="bugs/night/firefly.js"></script>
+<script src="bugs/night/spider.js"></script>
+<script src="bugs/night/stonefly.js"></script>
+<script src="bugs/night/glowworm.js"></script>
+<script src="bugs/night/mosquito.js"></script>
+
+<!-- DESERT THEME -->
+<script src="bugs/desert/namib-beetle.js"></script>
+<script src="bugs/desert/silver-ant.js"></script>
+<script src="bugs/desert/desert-locust.js"></script>
+<script src="bugs/desert/darkling-beetle.js"></script>
+<script src="bugs/desert/dune-cricket.js"></script>
+<script src="bugs/desert/scarab.js"></script>
+<script src="bugs/desert/antlion.js"></script>
+<script src="bugs/desert/sand-wasp.js"></script>
+
+<!-- OCEAN THEME -->
+<script src="bugs/ocean/fish.js"></script>
+<script src="bugs/ocean/jellyfish.js"></script>
+<script src="bugs/ocean/crab.js"></script>
+<script src="bugs/ocean/seahorse.js"></script>
+<script src="bugs/ocean/turtle.js"></script>
+<script src="bugs/ocean/shark.js"></script>
+
+<!-- SPACE THEME -->
+<script src="bugs/space/alien.js"></script>
+<script src="bugs/space/robot-bug.js"></script>
+<script src="bugs/space/ufo.js"></script>
+<script src="bugs/space/space-worm.js"></script>
+
+<!-- THEME REGISTRY -->
+<script src="bugs/theme-registry.js"></script>
 
 <script>
 const canvas = document.getElementById('c');
@@ -79,10 +124,19 @@ let mouse = { x: -999, y: -999 };
 let bugs = [], killed = 0;
 let errorTarget = 0, warningTarget = 0;
 let combo = 0, comboTimer = 0, particles = [];
-let currentBackground = 'mud'; // Default background
+let currentBackground = 'mud';
 
 bgSelector.addEventListener('change', () => {
     currentBackground = bgSelector.value;
+    setTheme(currentBackground);
+    // Clear all bugs and respawn with new theme creatures
+    bugs.forEach(b => b.alive = false);
+    bugs = [];
+    const tot = errorTarget + warningTarget;
+    for (let i = 0; i < tot; i++) {
+        bugs.push(new Bug(undefined, i >= errorTarget));
+    }
+    updateCountDisplay();
 });
 
 function resize() { W = canvas.width = canvas.clientWidth; H = canvas.height = canvas.clientHeight; }
@@ -126,7 +180,7 @@ class Bug {
         this.x = Math.max(12, Math.min(W - 12, this.x));
         this.y = Math.max(12, Math.min(H - 12, this.y));
         if (Math.random() < 0.006 && !fleeing) { this.vx = (Math.random() - 0.5) * this.bug.speed; this.vy = (Math.random() - 0.5) * this.bug.speed; }
-        if (this.type === 5 || fleeing) { this.trail.push({ x: this.x, y: this.y, a: 0.35 }); if (this.trail.length > 6) this.trail.shift(); for (let t of this.trail) t.a -= 0.04; }
+        if (fleeing) { this.trail.push({ x: this.x, y: this.y, a: 0.35 }); if (this.trail.length > 6) this.trail.shift(); for (let t of this.trail) t.a -= 0.04; }
     }
 
     draw(ctx) {
@@ -173,7 +227,6 @@ function drawEnv() {
     }
 }
 
-// ── MUD GROUND ─────────────────────────────────────────────
 function drawMudBackground() {
     const t = frame * 0.005;
     const mud = ctx.createLinearGradient(0, 0, 0, H);
@@ -188,24 +241,18 @@ function drawMudBackground() {
     }
 }
 
-// ── GRASS FIELD ────────────────────────────────────────────
 function drawGrassBackground() {
     const t = frame * 0.005;
     const sky = ctx.createLinearGradient(0, 0, 0, H);
     sky.addColorStop(0, '#87CEEB'); sky.addColorStop(0.6, '#B0E57C'); sky.addColorStop(1, '#4A8C2A');
     ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
-    // Grass blades
     for (let i = 0; i < 60; i++) {
-        const gx = (i / 60) * W;
-        const gh = 15 + Math.sin(i * 3) * 20;
+        const gx = (i / 60) * W; const gh = 15 + Math.sin(i * 3) * 20;
         const sway = Math.sin(t * 0.8 + i) * gh * 0.3;
         ctx.strokeStyle = `rgba(${40 + i % 30},${100 + i % 40},${20 + i % 20},0.6)`;
         ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.moveTo(gx, H); ctx.lineTo(gx + sway, H - gh);
-        ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(gx, H); ctx.lineTo(gx + sway, H - gh); ctx.stroke();
     }
-    // Floating pollen
     for (let i = 0; i < 15; i++) {
         const px = (Math.sin(i * 2.5 + t * 0.3) * 0.5 + 0.5) * W;
         const py = (Math.cos(i * 3.5 + t * 0.4) * 0.5 + 0.5) * H;
@@ -214,13 +261,11 @@ function drawGrassBackground() {
     }
 }
 
-// ── NIGHT SKY ──────────────────────────────────────────────
 function drawNightBackground() {
     const t = frame * 0.005;
     const sky = ctx.createLinearGradient(0, 0, 0, H);
     sky.addColorStop(0, '#0a0a2e'); sky.addColorStop(0.5, '#1a1a3e'); sky.addColorStop(1, '#0d1b2a');
     ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
-    // Stars
     for (let i = 0; i < 80; i++) {
         const sx = (Math.sin(i * 13.7) * 0.5 + 0.5) * W;
         const sy = (Math.cos(i * 17.3) * 0.5 + 0.5) * H * 0.7;
@@ -228,27 +273,21 @@ function drawNightBackground() {
         ctx.fillStyle = `rgba(255,255,220,${twinkle})`;
         ctx.beginPath(); ctx.arc(sx, sy, 0.5 + Math.abs(Math.sin(t + i)) * 1.5, 0, Math.PI * 2); ctx.fill();
     }
-    // Moon
     ctx.fillStyle = '#FFEECC';
     ctx.beginPath(); ctx.arc(W * 0.8, H * 0.2, 35, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = '#0a0a2e';
     ctx.beginPath(); ctx.arc(W * 0.82, H * 0.18, 30, 0, Math.PI * 2); ctx.fill();
 }
 
-// ── DESERT SAND ────────────────────────────────────────────
 function drawDesertBackground() {
     const t = frame * 0.005;
     const sky = ctx.createLinearGradient(0, 0, 0, H);
     sky.addColorStop(0, '#FF8C42'); sky.addColorStop(0.4, '#FFB347'); sky.addColorStop(1, '#F5DEB3');
     ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
-    // Sand dunes
     ctx.fillStyle = '#E8C872';
     ctx.beginPath(); ctx.moveTo(0, H);
-    for (let i = 0; i <= W; i += 20) {
-        ctx.lineTo(i, H * 0.5 + Math.sin(i * 0.01 + t) * 30);
-    }
+    for (let i = 0; i <= W; i += 20) { ctx.lineTo(i, H * 0.5 + Math.sin(i * 0.01 + t) * 30); }
     ctx.lineTo(W, H); ctx.closePath(); ctx.fill();
-    // Sand particles
     for (let i = 0; i < 25; i++) {
         const sx = (Math.sin(i * 4.5 + t * 0.5) * 0.5 + 0.5) * W;
         const sy = H * 0.3 + (Math.cos(i * 3.5) * 0.5 + 0.5) * H * 0.5;
@@ -257,19 +296,16 @@ function drawDesertBackground() {
     }
 }
 
-// ── OCEAN DEEP ─────────────────────────────────────────────
 function drawOceanBackground() {
     const t = frame * 0.005;
     const ocean = ctx.createLinearGradient(0, 0, 0, H);
     ocean.addColorStop(0, '#006994'); ocean.addColorStop(0.3, '#004466'); ocean.addColorStop(1, '#001a33');
     ctx.fillStyle = ocean; ctx.fillRect(0, 0, W, H);
-    // Light rays
     for (let i = 0; i < 8; i++) {
         const rx = W * (0.1 + i * 0.1);
         ctx.fillStyle = `rgba(100,180,255,${0.03 + Math.sin(t + i) * 0.02})`;
         ctx.beginPath(); ctx.moveTo(rx, 0); ctx.lineTo(rx + 30, H); ctx.lineTo(rx - 20, H); ctx.closePath(); ctx.fill();
     }
-    // Bubbles
     for (let i = 0; i < 20; i++) {
         const bx = (Math.sin(i * 3.2 + t * 0.2) * 0.5 + 0.5) * W;
         const by = H - ((frame * 0.2 + i * 40) % H);
@@ -278,13 +314,11 @@ function drawOceanBackground() {
     }
 }
 
-// ── SPACE ──────────────────────────────────────────────────
 function drawSpaceBackground() {
     const t = frame * 0.005;
     const space = ctx.createLinearGradient(0, 0, 0, H);
     space.addColorStop(0, '#000011'); space.addColorStop(0.5, '#0a0a2a'); space.addColorStop(1, '#050510');
     ctx.fillStyle = space; ctx.fillRect(0, 0, W, H);
-    // Stars
     for (let i = 0; i < 120; i++) {
         const sx = (Math.sin(i * 7.7 + i * i * 0.1) * 0.5 + 0.5) * W;
         const sy = (Math.cos(i * 11.3 + i * i * 0.05) * 0.5 + 0.5) * H;
@@ -292,7 +326,6 @@ function drawSpaceBackground() {
         ctx.fillStyle = `rgba(255,255,255,${twinkle})`;
         ctx.beginPath(); ctx.arc(sx, sy, 0.3 + Math.abs(Math.sin(t * 2 + i)) * 1.2, 0, Math.PI * 2); ctx.fill();
     }
-    // Nebula
     for (let i = 0; i < 4; i++) {
         const nx = W * (0.2 + i * 0.2);
         const ny = H * (0.3 + i * 0.1);

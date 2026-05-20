@@ -38,13 +38,26 @@ class GameViewProvider implements vscode.WebviewViewProvider {
         // Get HTML content
         let html = this.getGardenHTML();
 
-        // Replace bug script paths with proper webview URIs
-        const bugFiles = ['beetle.js', 'ladybug.js', 'fire-ant.js', 'spider.js', 'caterpillar.js', 'dragonfly.js', 'bug-registry.js'];
-        for (const file of bugFiles) {
-            const bugUri = vscode.Uri.joinPath(bugsDir, file);
-            const webviewUri = webviewView.webview.asWebviewUri(bugUri);
-            html = html.replace(`bugs/${file}`, webviewUri.toString());
+        // Replace ALL theme folder script paths with proper webview URIs
+        const themeFolders = ['mud', 'grass', 'night', 'desert', 'ocean', 'space'];
+        for (const folder of themeFolders) {
+            const folderPath = path.join(__dirname, '..', 'src', 'bugs', folder);
+            if (fs.existsSync(folderPath)) {
+                const files = fs.readdirSync(folderPath).filter(f => f.endsWith('.js'));
+                for (const file of files) {
+                    const searchStr = `bugs/${folder}/${file}`;
+                    const fileUri = vscode.Uri.file(path.join(folderPath, file));
+                    const webviewUri = webviewView.webview.asWebviewUri(fileUri);
+                    html = html.replace(searchStr, webviewUri.toString());
+                }
+            }
         }
+
+        // Also resolve theme-registry.js
+        const registryPath = path.join(__dirname, '..', 'src', 'bugs', 'theme-registry.js');
+        const registryUri = vscode.Uri.file(registryPath);
+        const registryWebviewUri = webviewView.webview.asWebviewUri(registryUri);
+        html = html.replace('bugs/theme-registry.js', registryWebviewUri.toString());
 
         webviewView.webview.html = html;
 
