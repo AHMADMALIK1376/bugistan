@@ -160,7 +160,13 @@ class Bug {
         this.y = 30 + Math.random() * (H - 60);
         this.vx = (Math.random() - 0.5) * this.bug.speed;
         this.vy = (Math.random() - 0.5) * this.bug.speed;
-        this.size = this.isWarning ? this.bug.size * 0.7 + Math.random() * 3 : this.bug.size + Math.random() * 4;
+        
+        const errorScale = 0.7 + (errorTarget * 0.06);
+        const warningScale = 0.5 + (warningTarget * 0.04);
+        this.size = this.isWarning 
+            ? (this.bug.size * warningScale + Math.random() * 2) 
+            : (this.bug.size * errorScale + Math.random() * 3);
+        
         this.alive = true;
         this.legPhase = Math.random() * Math.PI * 2;
         this.antennaPhase = Math.random() * Math.PI * 2;
@@ -177,16 +183,35 @@ class Bug {
         const fleeing = dist < 90;
         if (fleeing) { this.fleeTimer = 25; this.vx -= (dx / dist) * 0.6; this.vy -= (dy / dist) * 0.6; }
         if (this.fleeTimer > 0) this.fleeTimer--;
-        this.x += this.vx; this.y += this.vy;
+        
+        this.x += this.vx;
+        
+        // Ocean creatures: swim horizontally with gentle bobbing
+        if (currentBackground === 'ocean') {
+            this.y += Math.sin(this.wobble) * 0.4;
+            this.y = Math.max(H * 0.15, Math.min(H * 0.85, this.y));
+        } else {
+            this.y += this.vy;
+        }
+        
         this.wobble += 0.06; this.legPhase += 0.28 * this.bug.speed;
         this.antennaPhase += 0.12; this.wingPhase += 0.35;
         const spd = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
         if (spd > this.bug.speed * 2.5) { this.vx *= 0.88; this.vy *= 0.88; }
         if (this.x < 12 || this.x > W - 12) this.vx *= -1;
-        if (this.y < 12 || this.y > H - 12) this.vy *= -1;
         this.x = Math.max(12, Math.min(W - 12, this.x));
-        this.y = Math.max(12, Math.min(H - 12, this.y));
-        if (Math.random() < 0.006 && !fleeing) { this.vx = (Math.random() - 0.5) * this.bug.speed; this.vy = (Math.random() - 0.5) * this.bug.speed; }
+        
+        if (currentBackground === 'ocean') {
+            this.y = Math.max(H * 0.15, Math.min(H * 0.85, this.y));
+        } else {
+            if (this.y < 12 || this.y > H - 12) this.vy *= -1;
+            this.y = Math.max(12, Math.min(H - 12, this.y));
+        }
+        
+        if (Math.random() < 0.006 && !fleeing) { 
+            this.vx = (Math.random() - 0.5) * this.bug.speed; 
+            if (currentBackground !== 'ocean') this.vy = (Math.random() - 0.5) * this.bug.speed;
+        }
         if (fleeing) { this.trail.push({ x: this.x, y: this.y, a: 0.35 }); if (this.trail.length > 6) this.trail.shift(); for (let t of this.trail) t.a -= 0.04; }
     }
 
@@ -219,9 +244,6 @@ class Bug {
     contains(px, py) { return Math.abs(px - this.x) < this.size * 1.5 && Math.abs(py - this.y) < this.size * 1.5; }
 }
 
-// ============================================================
-// BACKGROUND SELECTOR
-// ============================================================
 function drawEnv() {
     switch (currentBackground) {
         case 'mud': drawMudBackground(); break;
