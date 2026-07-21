@@ -1,84 +1,68 @@
-// ── ROBOT BUG: Metallic body, LED eyes, mechanical legs ──────
+// ── ROBOT BUG: brushed alloy chassis, servo legs, sensor array ──────
 class RobotBug {
     static draw(ctx, s, bob, bug) {
-        const size = s * 1.2;
-        // Mechanical legs
-        ctx.strokeStyle = '#90A4AE'; ctx.lineWidth = size * 0.08; ctx.lineCap = 'round';
+        const alloy = '#a8bcd0';
+        // servo legs: piston segments with joint pivots
         for (let side = -1; side <= 1; side += 2) {
-            for (let i = -1; i <= 1; i++) {
-                const legY = bob + i * (size * 0.3);
-                const movement = Math.sin(bug.legPhase + i + (side > 0 ? 0 : Math.PI)) * (size * 0.12);
-                // Upper leg
-                ctx.beginPath();
-                ctx.moveTo(side * size * 0.12, legY);
-                ctx.lineTo(side * size * 0.4, legY - size * 0.05);
-                ctx.stroke();
-                // Lower leg
-                ctx.strokeStyle = '#78909C';
-                ctx.beginPath();
-                ctx.moveTo(side * size * 0.4, legY - size * 0.05);
-                ctx.lineTo(side * size * 0.65 + movement, legY + size * 0.2);
-                ctx.stroke();
-                // Joint
-                ctx.fillStyle = '#FFD54F';
-                ctx.beginPath();
-                ctx.arc(side * size * 0.4, legY - size * 0.05, size * 0.04, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.strokeStyle = '#90A4AE';
+            for (let i = 0; i < 3; i++) {
+                const step = Math.sin(bug.legPhase + i * 2.1 + (side > 0 ? Math.PI : 0)) * s * 0.14;
+                const hipX = side * s * 0.26, hipY = bob + (i - 1) * s * 0.28;
+                const kneeX = side * s * 0.62, kneeY = hipY - s * 0.14 + step * 0.4;
+                const footX = side * s * 0.8, footY = hipY + s * 0.34 + step;
+                ctx.strokeStyle = '#62788e';
+                ctx.lineCap = 'round';
+                ctx.lineWidth = s * 0.07;
+                ctx.beginPath(); ctx.moveTo(hipX, hipY); ctx.lineTo(kneeX, kneeY); ctx.stroke();
+                ctx.lineWidth = s * 0.045;
+                ctx.beginPath(); ctx.moveTo(kneeX, kneeY); ctx.lineTo(footX, footY); ctx.stroke();
+                // joint pivot dots
+                ctx.fillStyle = '#ccd8e4';
+                ctx.beginPath(); ctx.arc(kneeX, kneeY, s * 0.035, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = '#4c5c70';
+                ctx.beginPath(); ctx.arc(kneeX, kneeY, s * 0.016, 0, Math.PI * 2); ctx.fill();
             }
         }
-        // Metallic body
-        const bodyGrad = ctx.createRadialGradient(-size * 0.15, bob - size * 0.1, size * 0.05, 0, bob, size * 0.65);
-        bodyGrad.addColorStop(0, '#CFD8DC');
-        bodyGrad.addColorStop(0.5, '#90A4AE');
-        bodyGrad.addColorStop(1, '#546E7A');
-        ctx.fillStyle = bodyGrad;
-        ctx.beginPath(); ctx.ellipse(0, bob, size * 0.5, size * 0.6, 0, 0, Math.PI * 2); ctx.fill();
-        // Panel lines
-        ctx.strokeStyle = 'rgba(0,0,0,0.3)'; ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.moveTo(0, bob - size * 0.55); ctx.lineTo(0, bob + size * 0.55); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(-size * 0.35, bob - size * 0.1); ctx.lineTo(size * 0.35, bob - size * 0.1); ctx.stroke();
-        // Rivets
-        ctx.fillStyle = '#455A64';
-        const rivets = [{x:-0.2,y:-0.3},{x:0.2,y:-0.3},{x:-0.2,y:0.1},{x:0.2,y:0.1},{x:0,y:0.4}];
-        for (let r of rivets) {
+        // chassis: brushed metal shell with panel seams
+        A.orb(ctx, 0, bob + s * 0.06, s * 0.44, s * 0.56, 0, alloy, { specA: 0.55, lit: 0.5 });
+        // brushed-metal streaks
+        ctx.strokeStyle = 'rgba(255,255,255,0.10)';
+        ctx.lineWidth = 0.6;
+        for (let k = 0; k < 6; k++) {
             ctx.beginPath();
-            ctx.arc(r.x * size, bob + r.y * size, size * 0.04, 0, Math.PI * 2);
+            ctx.moveTo(-s * 0.3 + k * s * 0.11, bob - s * 0.4);
+            ctx.lineTo(-s * 0.34 + k * s * 0.11, bob + s * 0.55);
+            ctx.stroke();
+        }
+        // panel seams + rivets
+        ctx.strokeStyle = 'rgba(40,48,54,0.6)';
+        ctx.lineWidth = s * 0.02;
+        ctx.beginPath(); ctx.moveTo(0, bob - s * 0.48); ctx.lineTo(0, bob + s * 0.6); ctx.stroke();
+        ctx.beginPath(); ctx.arc(0, bob + s * 0.06, s * 0.3, 0, Math.PI * 2); ctx.stroke();
+        ctx.fillStyle = '#788ca0';
+        for (let k = 0; k < 6; k++) {
+            const a = (k / 6) * Math.PI * 2 + 0.5;
+            ctx.beginPath();
+            ctx.arc(Math.cos(a) * s * 0.3, bob + s * 0.06 + Math.sin(a) * s * 0.38, s * 0.022, 0, Math.PI * 2);
             ctx.fill();
         }
-        // Head
-        const headGrad = ctx.createRadialGradient(0, bob - size * 0.7, size * 0.05, 0, bob - size * 0.65, size * 0.3);
-        headGrad.addColorStop(0, '#B0BEC5'); headGrad.addColorStop(1, '#607D8B');
-        ctx.fillStyle = headGrad;
-        ctx.beginPath(); ctx.arc(0, bob - size * 0.65, size * 0.28, 0, Math.PI * 2); ctx.fill();
-        // LED eyes
-        for (let side = -1; side <= 1; side += 2) {
-            const ledGlow = ctx.createRadialGradient(side * size * 0.12, bob - size * 0.72, 0, side * size * 0.12, bob - size * 0.72, size * 0.12);
-            ledGlow.addColorStop(0, 'rgba(0, 255, 255, 0.8)');
-            ledGlow.addColorStop(0.5, 'rgba(0, 200, 255, 0.4)');
-            ledGlow.addColorStop(1, 'rgba(0, 100, 255, 0)');
-            ctx.fillStyle = ledGlow;
-            ctx.beginPath(); ctx.arc(side * size * 0.12, bob - size * 0.72, size * 0.12, 0, Math.PI * 2); ctx.fill();
-            // LED center
-            ctx.fillStyle = '#00FFFF';
-            ctx.beginPath(); ctx.arc(side * size * 0.12, bob - size * 0.72, size * 0.06, 0, Math.PI * 2); ctx.fill();
-            ctx.fillStyle = 'white';
-            ctx.beginPath(); ctx.arc(side * size * 0.1, bob - size * 0.75, size * 0.03, 0, Math.PI * 2); ctx.fill();
-        }
-        // Antenna
-        ctx.strokeStyle = '#78909C'; ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(0, bob - size * 0.9);
-        ctx.lineTo(size * 0.15, bob - size * 1.2);
-        ctx.stroke();
-        ctx.fillStyle = '#FF0000';
-        ctx.beginPath(); ctx.arc(size * 0.15, bob - size * 1.2, size * 0.05, 0, Math.PI * 2); ctx.fill();
-        // Blinking LED
-        if (Math.sin(bug.wobble * 5) > 0) {
-            ctx.fillStyle = '#FF0000';
-        } else {
-            ctx.fillStyle = '#660000';
-        }
-        ctx.beginPath(); ctx.arc(size * 0.15, bob - size * 1.2, size * 0.05, 0, Math.PI * 2); ctx.fill();
+        // reactor core: pulsing cyan heart under a porthole
+        const corePulse = 0.5 + Math.sin(bug.wobble * 2.4) * 0.5;
+        const core = ctx.createRadialGradient(0, bob + s * 0.06, 0, 0, bob + s * 0.06, s * 0.16);
+        core.addColorStop(0, `rgba(150,240,255,${0.6 + corePulse * 0.4})`);
+        core.addColorStop(0.7, `rgba(40,160,210,${0.4 + corePulse * 0.3})`);
+        core.addColorStop(1, 'rgba(20,90,130,0.15)');
+        ctx.fillStyle = core;
+        ctx.beginPath(); ctx.arc(0, bob + s * 0.06, s * 0.14, 0, Math.PI * 2); ctx.fill();
+        A.glow(ctx, 0, bob + s * 0.06, s * 0.4, '#57c8e8', corePulse * 0.18);
+        // head unit with the crying face
+        A.orb(ctx, 0, bob - s * 0.52, s * 0.24, s * 0.19, 0, '#b8c8d8', { specA: 0.5 });
+        A.face(ctx, 0, bob - s * 0.52, s * 0.44, bug.wobble);
+        // antenna mast with a blinking tip
+        ctx.strokeStyle = '#62788e';
+        ctx.lineWidth = s * 0.025;
+        ctx.beginPath(); ctx.moveTo(0, bob - s * 0.66); ctx.lineTo(s * 0.06, bob - s * 0.92); ctx.stroke();
+        const blink = Math.sin(bug.wobble * 3) > 0.4 ? 0.9 : 0.15;
+        ctx.fillStyle = `rgba(120,255,170,${blink})`;
+        ctx.beginPath(); ctx.arc(s * 0.06, bob - s * 0.94, s * 0.03, 0, Math.PI * 2); ctx.fill();
     }
 }

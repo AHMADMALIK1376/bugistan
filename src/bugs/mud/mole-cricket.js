@@ -1,47 +1,49 @@
-// ── MOLE CRICKET: Shovel front legs, cylindrical body ──────
+// ── MOLE CRICKET: velvet burrower with shovel forelimbs ──────
 class MoleCricket {
     static draw(ctx, s, bob, bug) {
-        const size = s * 1.2;
-        // Large shovel-like front legs
+        const body = '#c98a4a';
+        const dig = Math.sin(bug.legPhase * 0.8) * s * 0.1;
+        // hind + mid legs: stout, tucked close
         for (let side = -1; side <= 1; side += 2) {
-            ctx.fillStyle = '#6B5040';
-            ctx.beginPath();
-            ctx.ellipse(side*size*0.5, bob-size*0.1, size*0.25, size*0.15, -0.3, 0, Math.PI*2);
-            ctx.fill();
-            // Claws
-            ctx.strokeStyle = '#3A2A1A'; ctx.lineWidth = size * 0.06;
-            for (let i = -1; i <= 1; i++) {
+            const sw = Math.sin(bug.legPhase + (side > 0 ? Math.PI : 0)) * s * 0.12;
+            A.leg(ctx, side * s * 0.2, bob + s * 0.15, side * s * 0.62 + sw * 0.3, bob + s * 0.55 + sw, side * s * 0.3, s * 0.09, A.tone(body, -0.35));
+            A.leg(ctx, side * s * 0.2, bob - s * 0.05, side * s * 0.55 - sw * 0.3, bob + s * 0.28 - sw, side * s * 0.26, s * 0.08, A.tone(body, -0.35));
+        }
+        // cylindrical velvet abdomen
+        A.segs(ctx, 0, bob + s * 0.18, 5, s * 0.3, s * 0.17, 0.3, body, bug.wobble);
+        // short cerci
+        ctx.strokeStyle = A.tone(body, -0.3);
+        ctx.lineWidth = s * 0.05;
+        ctx.lineCap = 'round';
+        const ty = bob + s * 0.18 + 4 * s * 0.17;
+        ctx.beginPath(); ctx.moveTo(-s * 0.08, ty); ctx.lineTo(-s * 0.22, ty + s * 0.3); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(s * 0.08, ty); ctx.lineTo(s * 0.22, ty + s * 0.3); ctx.stroke();
+        // broad armored pronotum (the digging plough)
+        A.orb(ctx, 0, bob - s * 0.14, s * 0.34, s * 0.36, 0, '#ba7a3c', { specA: 0.22 });
+        ctx.strokeStyle = 'rgba(30,20,12,0.5)';
+        ctx.lineWidth = 0.8;
+        ctx.beginPath(); ctx.arc(0, bob - s * 0.14, s * 0.3, Math.PI * 1.15, Math.PI * 1.85); ctx.stroke();
+        // shovel forelimbs: broad flattened tibiae with claw teeth
+        for (let side = -1; side <= 1; side += 2) {
+            ctx.save();
+            ctx.translate(side * s * 0.42, bob - s * 0.26 + dig * side * 0.4);
+            ctx.rotate(side * -0.5);
+            A.orb(ctx, 0, 0, s * 0.26, s * 0.15, 0, '#dda45f', { specA: 0.24 });
+            // digging teeth
+            ctx.fillStyle = '#5c3a16';
+            for (let k = 0; k < 3; k++) {
                 ctx.beginPath();
-                ctx.moveTo(side*size*0.45+i*size*0.08, bob-size*0.05);
-                ctx.lineTo(side*size*0.65+i*size*0.05, bob-size*0.2);
-                ctx.stroke();
+                ctx.moveTo(s * (0.08 + k * 0.09) - s * 0.2, -s * 0.12);
+                ctx.lineTo(s * (0.13 + k * 0.09) - s * 0.2, -s * 0.26);
+                ctx.lineTo(s * (0.18 + k * 0.09) - s * 0.2, -s * 0.12);
+                ctx.closePath();
+                ctx.fill();
             }
+            ctx.restore();
         }
-        // Cylindrical body
-        const bodyGrad = ctx.createLinearGradient(0, bob-size*0.4, 0, bob+size*0.4);
-        bodyGrad.addColorStop(0, '#8B7355'); bodyGrad.addColorStop(0.5, '#6B5040'); bodyGrad.addColorStop(1, '#4A3728');
-        ctx.fillStyle = bodyGrad;
-        ctx.beginPath(); ctx.ellipse(0, bob, size*0.3, size*0.5, 0, 0, Math.PI*2); ctx.fill();
-        // Segments
-        ctx.strokeStyle = 'rgba(0,0,0,0.25)'; ctx.lineWidth = 0.7;
-        for (let i = 0; i < 4; i++) {
-            const sy = bob-size*0.2+i*size*0.15;
-            ctx.beginPath(); ctx.moveTo(-size*0.25, sy); ctx.lineTo(size*0.25, sy); ctx.stroke();
-        }
-        // Head
-        ctx.fillStyle = '#5C4033';
-        ctx.beginPath(); ctx.arc(0, bob-size*0.55, size*0.2, 0, Math.PI*2); ctx.fill();
-        // Tiny eyes
-        ctx.fillStyle = '#111';
-        ctx.beginPath(); ctx.arc(-size*0.1, bob-size*0.6, size*0.04, 0, Math.PI*2); ctx.fill();
-        ctx.beginPath(); ctx.arc(size*0.1, bob-size*0.6, size*0.04, 0, Math.PI*2); ctx.fill();
-        // Antennae
-        ctx.strokeStyle = '#4A3728'; ctx.lineWidth = 0.7;
-        for (let side = -1; side <= 1; side += 2) {
-            ctx.beginPath();
-            ctx.moveTo(side*size*0.06, bob-size*0.72);
-            ctx.lineTo(side*size*0.18, bob-size*0.95);
-            ctx.stroke();
-        }
+        // head: small, mostly buried under the pronotum
+        A.orb(ctx, 0, bob - s * 0.48, s * 0.18, s * 0.16, 0, '#d09250', {});
+        A.face(ctx, 0, bob - s * 0.48, s * 0.5, bug.wobble);
+        A.antennae(ctx, s * 0.7, bob - s * 0.56, bug.antennaPhase, '#7e5527', { len: 0.7 });
     }
 }

@@ -6,39 +6,43 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body {
             width: 100%; height: 100vh; overflow: hidden;
-            background: #1e1e1e;
-            font-family: 'Georgia', serif;
+            background: #16181d;
+            font-family: ui-sans-serif, system-ui, 'Segoe UI', sans-serif;
             cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36"><text y="32" font-size="32">🩴</text></svg>') 18 4, auto;
         }
         #area { display: flex; flex-direction: column; width: 100%; height: 100%; }
         #hdr {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 7px 12px;
-            background: #2d2d2d;
-            color: #FFD080; font-size: 13px; font-weight: bold; letter-spacing: 4px;
-            border-bottom: 2px solid #FF6600; z-index: 10;
+            padding: 7px 10px;
+            background: linear-gradient(180deg, #23262e 0%, #1b1e24 100%);
+            color: #d8c8a8; font-size: 12px; font-weight: 600; letter-spacing: 2.5px;
+            border-bottom: 1px solid rgba(217,163,60,0.35); z-index: 10;
         }
         #hdr .title { flex: 1; text-align: center; }
-        #bgSelector {
-            background: #3a3a3a; color: #FFE0A0; border: 1px solid #555;
-            padding: 3px 8px; border-radius: 4px; font-size: 11px;
-            cursor: pointer; font-family: 'Georgia', serif;
+        #bgSelector, #soundBtn {
+            background: rgba(255,255,255,0.05); color: #cfc4a8;
+            border: 1px solid rgba(255,255,255,0.12);
+            padding: 3px 8px; border-radius: 5px; font-size: 11px;
+            cursor: pointer; font-family: inherit;
+            transition: background 0.15s ease, border-color 0.15s ease;
         }
-        #bgSelector:hover { background: #4a4a4a; }
+        #bgSelector:hover, #soundBtn:hover { background: rgba(255,255,255,0.1); border-color: rgba(217,163,60,0.5); }
+        #bgSelector option { background: #1b1e24; }
         #info {
             text-align: center; padding: 4px 8px; font-size: 10px;
-            color: #FFE0A0; background: #252525;
-            border-bottom: 1px solid #444; z-index: 10; letter-spacing: 1px;
+            color: #a8a294; background: #14161b;
+            border-bottom: 1px solid rgba(255,255,255,0.06); z-index: 10; letter-spacing: 0.8px;
         }
-        #info .red { color: #FF6060; }
-        #info .yellow { color: #FFD040; }
+        #info b { color: #d8d2c0; }
+        #info .red { color: #d96a5c; }
+        #info .yellow { color: #d9a33c; }
         canvas { flex-grow: 1; display: block; }
     </style>
 </head>
 <body>
 <div id="area">
     <div id="hdr">
-        <span></span>
+        <button id="soundBtn" title="Toggle sound">🔊</button>
         <span class="title">🐛 BUG HUNT 🩴</span>
         <select id="bgSelector">
             <option value="mud">🪵 Mud Ground</option>
@@ -47,6 +51,8 @@
             <option value="desert">🏜️ Desert Sand</option>
             <option value="ocean">🌊 Ocean Deep</option>
             <option value="space">🚀 Space</option>
+            <option value="candy">🍬 Candy Land</option>
+            <option value="cyber">🖥️ Cyber Grid</option>
         </select>
     </div>
     <div id="info">
@@ -57,6 +63,9 @@
     <canvas id="c"></canvas>
 </div>
 
+<!-- SHARED ART TOOLKIT -->
+<script src="bugs/art.js"></script>
+
 <!-- BACKGROUNDS -->
 <script src="backgrounds/mud.js"></script>
 <script src="backgrounds/grass.js"></script>
@@ -64,6 +73,8 @@
 <script src="backgrounds/desert.js"></script>
 <script src="backgrounds/ocean.js"></script>
 <script src="backgrounds/space.js"></script>
+<script src="backgrounds/candy.js"></script>
+<script src="backgrounds/cyber.js"></script>
 
 <!-- MUD THEME CREATURES -->
 <script src="bugs/mud/mud-dauber.js"></script>
@@ -115,6 +126,21 @@
 <script src="bugs/space/ufo.js"></script>
 <script src="bugs/space/space-worm.js"></script>
 
+<!-- CANDY THEME CREATURES -->
+<script src="bugs/candy/donut.js"></script>
+<script src="bugs/candy/gummy-bear.js"></script>
+<script src="bugs/candy/lollipop.js"></script>
+<script src="bugs/candy/candy-corn.js"></script>
+<script src="bugs/candy/jellybean.js"></script>
+<script src="bugs/candy/marshmallow.js"></script>
+
+<!-- CYBER THEME CREATURES -->
+<script src="bugs/cyber/circuit-crawler.js"></script>
+<script src="bugs/cyber/glitch-bot.js"></script>
+<script src="bugs/cyber/nano-drone.js"></script>
+<script src="bugs/cyber/spam-bot.js"></script>
+<script src="bugs/cyber/virus-byte.js"></script>
+
 <!-- THEME REGISTRY -->
 <script src="bugs/theme-registry.js"></script>
 
@@ -126,6 +152,66 @@ const warnCountEl = document.getElementById('warnCount');
 const kc = document.getElementById('kc');
 const comboEl = document.getElementById('combo');
 const bgSelector = document.getElementById('bgSelector');
+const soundBtn = document.getElementById('soundBtn');
+
+let vscode = null;
+try { vscode = acquireVsCodeApi(); } catch (e) {}
+
+// ============================================================
+// SOUND - squish effects synthesized with Web Audio (no files)
+// ============================================================
+let soundOn = true;
+let audioCtx = null;
+
+function getAudioCtx() {
+    if (!audioCtx) {
+        try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; }
+    }
+    if (audioCtx.state === 'suspended') { audioCtx.resume(); }
+    return audioCtx;
+}
+
+function updateSoundBtn() { soundBtn.textContent = soundOn ? '🔊' : '🔇'; }
+
+soundBtn.addEventListener('click', () => { soundOn = !soundOn; updateSoundBtn(); });
+
+function playSquish(isWarning, comboLevel) {
+    if (!soundOn) { return; }
+    const ac = getAudioCtx();
+    if (!ac) { return; }
+    const t = ac.currentTime;
+
+    // Wet splat: a short burst of noise squeezed through a falling lowpass filter
+    const dur = 0.15;
+    const buf = ac.createBuffer(1, Math.floor(ac.sampleRate * dur), ac.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < data.length; i++) {
+        data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / data.length, 2);
+    }
+    const noise = ac.createBufferSource();
+    noise.buffer = buf;
+    const filt = ac.createBiquadFilter();
+    filt.type = 'lowpass';
+    filt.frequency.setValueAtTime(isWarning ? 900 : 600, t);
+    filt.frequency.exponentialRampToValueAtTime(120, t + dur);
+    const noiseGain = ac.createGain();
+    noiseGain.gain.setValueAtTime(0.5, t);
+    noiseGain.gain.exponentialRampToValueAtTime(0.01, t + dur);
+    noise.connect(filt); filt.connect(noiseGain); noiseGain.connect(ac.destination);
+    noise.start(t); noise.stop(t + dur);
+
+    // Squelch: quick downward pitch blip; combo raises the starting pitch
+    const osc = ac.createOscillator();
+    osc.type = 'triangle';
+    const base = (isWarning ? 300 : 220) + Math.min(comboLevel || 0, 10) * 25;
+    osc.frequency.setValueAtTime(base, t);
+    osc.frequency.exponentialRampToValueAtTime(60, t + 0.12);
+    const oscGain = ac.createGain();
+    oscGain.gain.setValueAtTime(0.25, t);
+    oscGain.gain.exponentialRampToValueAtTime(0.01, t + 0.12);
+    osc.connect(oscGain); oscGain.connect(ac.destination);
+    osc.start(t); osc.stop(t + 0.12);
+}
 
 let W, H, frame = 0;
 let mouse = { x: -999, y: -999 };
@@ -133,13 +219,17 @@ let bugs = [], killed = 0;
 let errorTarget = 0, warningTarget = 0;
 let combo = 0, comboTimer = 0, particles = [];
 let currentBackground = 'mud';
+let speedMult = 1, maxBugs = 5;
+
+// Total bugs on screen, capped by the bugistan.maxBugs setting
+function totalTarget() { return Math.min(errorTarget + warningTarget, maxBugs); }
 
 bgSelector.addEventListener('change', () => {
     currentBackground = bgSelector.value;
     setTheme(currentBackground);
     bugs.forEach(b => b.alive = false);
     bugs = [];
-    const tot = errorTarget + warningTarget;
+    const tot = totalTarget();
     for (let i = 0; i < tot; i++) {
         bugs.push(new Bug(undefined, i >= errorTarget));
     }
@@ -156,13 +246,17 @@ class Bug {
         this.bug = bugTypes[this.type];
         this.isWarning = isWarning || false;
         this.canFly = this.bug.canFly !== undefined ? this.bug.canFly : true;
+        this.speed = this.bug.speed * speedMult;
         this.x = 30 + Math.random() * (W - 60);
         this.y = 30 + Math.random() * (H - 60);
-        this.vx = (Math.random() - 0.5) * this.bug.speed;
-        this.vy = (Math.random() - 0.5) * this.bug.speed;
-        
-        const errorScale = 0.7 + (errorTarget * 0.06);
-        const warningScale = 0.5 + (warningTarget * 0.04);
+        this.vx = (Math.random() - 0.5) * this.speed;
+        this.vy = (Math.random() - 0.5) * this.speed;
+        this.targetVx = this.vx;
+        this.targetVy = this.vy;
+        this.angle = Math.atan2(this.vy, this.vx);
+
+        const errorScale = Math.min(2.1, 1.35 + (errorTarget * 0.05));
+        const warningScale = Math.min(1.7, 1.05 + (warningTarget * 0.04));
         this.size = this.isWarning 
             ? (this.bug.size * warningScale + Math.random() * 2) 
             : (this.bug.size * errorScale + Math.random() * 3);
@@ -181,9 +275,17 @@ class Bug {
         const dx = mouse.x - this.x, dy = mouse.y - this.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
         const fleeing = dist < 90;
-        if (fleeing) { this.fleeTimer = 25; this.vx -= (dx / dist) * 0.6; this.vy -= (dy / dist) * 0.6; }
+        if (fleeing) {
+            this.fleeTimer = 25;
+            this.vx -= (dx / dist) * 0.6; this.vy -= (dy / dist) * 0.6;
+            this.targetVx = this.vx; this.targetVy = this.vy;
+        } else {
+            // ease toward the wandering target velocity instead of snapping to it
+            this.vx += (this.targetVx - this.vx) * 0.05;
+            this.vy += (this.targetVy - this.vy) * 0.05;
+        }
         if (this.fleeTimer > 0) this.fleeTimer--;
-        
+
         this.x += this.vx;
         
         // Ocean creatures: swim horizontally with gentle bobbing
@@ -194,52 +296,70 @@ class Bug {
             this.y += this.vy;
         }
         
-        this.wobble += 0.06; this.legPhase += 0.28 * this.bug.speed;
+        this.wobble += 0.06; this.legPhase += 0.28 * this.speed;
         this.antennaPhase += 0.12; this.wingPhase += 0.35;
         const spd = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
-        if (spd > this.bug.speed * 2.5) { this.vx *= 0.88; this.vy *= 0.88; }
-        if (this.x < 12 || this.x > W - 12) this.vx *= -1;
+        if (spd > this.speed * 2.5) { this.vx *= 0.88; this.vy *= 0.88; this.targetVx = this.vx; this.targetVy = this.vy; }
+        if (this.x < 12 || this.x > W - 12) { this.vx *= -1; this.targetVx = this.vx; }
         this.x = Math.max(12, Math.min(W - 12, this.x));
-        
+
         if (currentBackground === 'ocean') {
             this.y = Math.max(H * 0.15, Math.min(H * 0.85, this.y));
         } else {
-            if (this.y < 12 || this.y > H - 12) this.vy *= -1;
+            if (this.y < 12 || this.y > H - 12) { this.vy *= -1; this.targetVy = this.vy; }
             this.y = Math.max(12, Math.min(H - 12, this.y));
         }
-        
-        if (Math.random() < 0.006 && !fleeing) { 
-            this.vx = (Math.random() - 0.5) * this.bug.speed; 
-            if (currentBackground !== 'ocean') this.vy = (Math.random() - 0.5) * this.bug.speed;
+
+        if (Math.random() < 0.006 && !fleeing) {
+            this.targetVx = (Math.random() - 0.5) * this.speed;
+            if (currentBackground !== 'ocean') this.targetVy = (Math.random() - 0.5) * this.speed;
         }
+        // ease the facing angle toward the current heading (shortest-arc), so
+        // turns read as a smooth swing instead of an instant snap
+        const heading = Math.atan2(this.vy, this.vx);
+        let da = heading - this.angle;
+        da = ((da + Math.PI) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2) - Math.PI;
+        this.angle += da * 0.15;
         if (fleeing) { this.trail.push({ x: this.x, y: this.y, a: 0.35 }); if (this.trail.length > 6) this.trail.shift(); for (let t of this.trail) t.a -= 0.04; }
     }
 
     draw(ctx) {
         if (!this.alive) return;
-        for (let t of this.trail) { ctx.save(); ctx.globalAlpha = Math.max(0, t.a); ctx.fillStyle = this.isWarning ? '#FFD040' : '#88FFAA'; ctx.beginPath(); ctx.arc(t.x, t.y, this.size * 0.25, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
+        for (let t of this.trail) { ctx.save(); ctx.globalAlpha = Math.max(0, t.a) * 0.55; ctx.fillStyle = this.isWarning ? '#d9a33c' : '#9ab8a0'; ctx.beginPath(); ctx.arc(t.x, t.y, this.size * 0.2, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
         ctx.save(); ctx.translate(this.x, this.y);
-        const s = this.size, angle = Math.atan2(this.vy, this.vx);
+        const s = this.size, angle = this.angle;
         ctx.rotate(angle + Math.PI / 2);
         const bob = Math.sin(this.wobble) * 1.2, fleeing = this.fleeTimer > 0;
+        // world-aligned ground effects: soft contact shadow offset away
+        // from the global top-left light, plus a quiet severity aura
         ctx.save(); ctx.rotate(-(angle + Math.PI / 2));
-        ctx.fillStyle = 'rgba(0,0,0,0.5)';
-        ctx.beginPath(); ctx.ellipse(0, s * 0.7, s * 0.9, s * 0.18, 0, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = 'rgba(255,255,200,0.15)';
-        ctx.beginPath(); ctx.ellipse(0, 0, s * 1.3, s * 1.3, 0, 0, Math.PI * 2); ctx.fill();
+        A.ao(ctx, s * 0.18, s * 0.55, s, s * 0.32, 0.3);
+        const aura = this.isWarning ? '217,163,60' : '205,68,58';
+        const pulse = 0.5 + Math.sin(this.wobble * 1.5) * 0.5;
+        const ag = ctx.createRadialGradient(0, 0, s * 0.4, 0, 0, s * 1.5);
+        ag.addColorStop(0, `rgba(${aura},0)`);
+        ag.addColorStop(0.75, `rgba(${aura},${0.05 + pulse * 0.06})`);
+        ag.addColorStop(1, `rgba(${aura},0)`);
+        ctx.fillStyle = ag;
+        ctx.beginPath(); ctx.arc(0, 0, s * 1.5, 0, Math.PI * 2); ctx.fill();
         ctx.restore();
-        if (this.isWarning && !fleeing) { ctx.strokeStyle = 'rgba(255,200,0,0.6)'; ctx.lineWidth = 1.2; ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.arc(0, bob, s * 1.45, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]); }
         if (this.bug.draw) { this.bug.draw(ctx, s, bob, this); }
-        if (fleeing) { ctx.strokeStyle = 'rgba(255,240,60,0.9)'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(0, bob, s * 1.55, 0, Math.PI * 2); ctx.stroke(); for (let i = 0; i < 4; i++) { const a = i * Math.PI / 2; ctx.strokeStyle = 'rgba(255,255,120,0.5)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(Math.cos(a) * s * 1.6, Math.sin(a) * s * 1.6 + bob); ctx.lineTo(Math.cos(a) * s * 2.2, Math.sin(a) * s * 2.2 + bob); ctx.stroke(); } }
+        if (fleeing) {
+            const fa = this.fleeTimer / 25;
+            ctx.strokeStyle = `rgba(255,245,220,${0.45 * fa})`;
+            ctx.lineWidth = 1.4;
+            ctx.beginPath(); ctx.arc(0, bob, s * (1.5 + (1 - fa) * 0.6), 0, Math.PI * 2); ctx.stroke();
+        }
         ctx.restore();
     }
 
     squish() {
         if (!this.alive) return; this.alive = false;
-        for (let i = 0; i < 18; i++) { particles.push({ x: this.x, y: this.y, vx: (Math.random() - 0.5) * 9, vy: (Math.random() - 0.5) * 7 - 2, life: 1, color: this.isWarning ? '#FFD040' : '#8B6914', size: 2 + Math.random() * 5, isSplat: i < 5 }); }
+        for (let i = 0; i < 18; i++) { particles.push({ x: this.x, y: this.y, vx: (Math.random() - 0.5) * 9, vy: (Math.random() - 0.5) * 7 - 2, life: 1, color: i < 5 ? '#2c2418' : (this.isWarning ? '#d9a33c' : (this.bug.color || '#5c5648')), size: 2 + Math.random() * 5, isSplat: i < 5 }); }
         killed++; kc.textContent = killed; combo++; comboTimer = 40; comboEl.textContent = combo > 1 ? combo + 'x' : '0';
-        setTimeout(() => { bugs = bugs.filter(b => b !== this); const tot = errorTarget + warningTarget; while (bugs.length < tot) bugs.push(new Bug(undefined, bugs.length >= errorTarget)); updateCountDisplay(); }, 400);
-        try { vscode.postMessage({ command: 'bugKilled', points: this.isWarning ? 5 : 10 }); } catch (e) {}
+        playSquish(this.isWarning, combo);
+        setTimeout(() => { bugs = bugs.filter(b => b !== this); const tot = totalTarget(); while (bugs.length < tot) bugs.push(new Bug(undefined, bugs.length >= errorTarget)); updateCountDisplay(); }, 400);
+        if (vscode) vscode.postMessage({ command: 'bugKilled', points: this.isWarning ? 5 : 10 });
     }
     contains(px, py) { return Math.abs(px - this.x) < this.size * 1.5 && Math.abs(py - this.y) < this.size * 1.5; }
 }
@@ -252,6 +372,8 @@ function drawEnv() {
         case 'desert': drawDesertBackground(); break;
         case 'ocean': drawOceanBackground(); break;
         case 'space': drawSpaceBackground(); break;
+        case 'candy': drawCandyBackground(); break;
+        case 'cyber': drawCyberBackground(); break;
         default: drawMudBackground();
     }
 }
@@ -259,12 +381,22 @@ function drawEnv() {
 function updateParticles(){for(let p of particles){p.x+=p.vx;p.y+=p.vy;if(!p.isSplat)p.vy+=0.1;p.life-=0.025}particles=particles.filter(p=>p.life>0)}
 function drawParticles(){for(let p of particles){ctx.save();ctx.globalAlpha=p.life;ctx.fillStyle=p.color;if(p.isSplat){ctx.beginPath();ctx.ellipse(p.x,p.y,p.size*2,p.size*.5,0,0,Math.PI*2);ctx.fill()}else{ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);ctx.fill()}ctx.restore()}}
 function updateCountDisplay(){errCountEl.textContent=errorTarget;warnCountEl.textContent=warningTarget}
-function setTargets(errors,warnings){errorTarget=errors;warningTarget=warnings;const tot=errors+warnings;bugs=bugs.filter(b=>b.alive);while(bugs.length>tot){const b=bugs.pop();if(b)b.alive=false}while(bugs.length<tot)bugs.push(new Bug(undefined,bugs.length>=errors));updateCountDisplay()}
+function setTargets(errors,warnings){errorTarget=errors;warningTarget=warnings;const tot=totalTarget();bugs=bugs.filter(b=>b.alive);while(bugs.length>tot){const b=bugs.pop();if(b)b.alive=false}while(bugs.length<tot)bugs.push(new Bug(undefined,bugs.length>=errors));updateCountDisplay()}
 function gameLoop(){frame++;if(comboTimer>0){comboTimer--;if(!comboTimer){combo=0;comboEl.textContent='0'}}updateParticles();ctx.clearRect(0,0,W,H);drawEnv();for(let b of bugs){b.update();b.draw(ctx)}drawParticles();requestAnimationFrame(gameLoop)}
 canvas.addEventListener('click',e=>{const r=canvas.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;for(let i=bugs.length-1;i>=0;i--){if(bugs[i].alive&&bugs[i].contains(mx,my)){bugs[i].squish();break}}});
-window.addEventListener('message',e=>{if(e.data.command==='setTargets')setTargets(e.data.errors,e.data.warnings)});
+window.addEventListener('message',e=>{
+    if(e.data.command==='setTargets')setTargets(e.data.errors,e.data.warnings);
+    if(e.data.command==='setConfig'){
+        speedMult=e.data.speedMultiplier||1;
+        maxBugs=e.data.maxBugs||5;
+        soundOn=e.data.soundEnabled!==false;
+        updateSoundBtn();
+        bugs.forEach(b=>b.alive=false);bugs=[];
+        setTargets(errorTarget,warningTarget);
+    }
+});
 resize();
-try{const vscode=acquireVsCodeApi();vscode.postMessage({command:'ready'});}catch(e){}
+if(vscode)vscode.postMessage({command:'ready'});
 gameLoop();
 </script>
 </body>

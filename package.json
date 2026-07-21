@@ -75,6 +75,11 @@
           "type": "number",
           "default": 5,
           "description": "Maximum bugs on screen"
+        },
+        "bugistan.soundEnabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Play squish sound effects when killing bugs"
         }
       }
     }
@@ -86,16 +91,13 @@
     "lint": "eslint src"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
     "@types/node": "20.x",
     "@types/vscode": "^1.85.0",
     "eslint": "^8.57.0",
     "ts-loader": "^9.5.1",
     "typescript": "^5.7.3",
+    "typescript-eslint": "^8.64.0",
     "webpack": "^5.95.0",
     "webpack-cli": "^5.1.4"
-  },
-  "dependencies": {
-    "sound-play": "^1.1.0"
   }
 }

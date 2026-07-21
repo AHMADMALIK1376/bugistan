@@ -1,56 +1,79 @@
-// ── SEAHORSE: Curled tail, coronet, delicate fins ──────
+// ── SEAHORSE: golden armor rings, coronet, curled grip tail ──────
 class Seahorse {
     static draw(ctx, s, bob, bug) {
-        const size = s * 1.1;
-        // Curled tail
-        ctx.strokeStyle = '#FFD54F'; ctx.lineWidth = size * 0.15;
-        ctx.beginPath();
-        ctx.moveTo(0, bob + size * 0.3);
-        ctx.quadraticCurveTo(size*0.2, bob+size*0.6, -size*0.05, bob+size*0.5);
-        ctx.stroke();
-        // Tail curl
-        ctx.fillStyle = '#FFD54F';
-        ctx.beginPath(); ctx.arc(-size*0.02, bob+size*0.52, size*0.12, 0, Math.PI*2); ctx.fill();
-        // Body
-        const bodyGrad = ctx.createLinearGradient(0, bob-size*0.4, 0, bob+size*0.3);
-        bodyGrad.addColorStop(0, '#FFE082'); bodyGrad.addColorStop(0.5, '#FFD54F'); bodyGrad.addColorStop(1, '#FFC107');
-        ctx.fillStyle = bodyGrad;
-        ctx.beginPath();
-        ctx.moveTo(-size*0.2, bob-size*0.35);
-        ctx.quadraticCurveTo(-size*0.35, bob-size*0.05, -size*0.15, bob+size*0.2);
-        ctx.quadraticCurveTo(0, bob+size*0.35, size*0.15, bob+size*0.2);
-        ctx.quadraticCurveTo(size*0.35, bob-size*0.05, size*0.2, bob-size*0.35);
-        ctx.closePath(); ctx.fill();
-        // Body ridges
-        ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 1;
-        for (let i = 0; i < 5; i++) {
-            const ry = bob-size*0.2+i*size*0.12;
-            ctx.beginPath();
-            ctx.moveTo(-size*0.2, ry); ctx.lineTo(size*0.2, ry); ctx.stroke();
+        const body = '#ffc84a';
+        const sway = Math.sin(bug.wobble) * 0.1;
+        ctx.save();
+        ctx.rotate(sway);
+        // curled prehensile tail: a spiral of shrinking segments
+        let tx = s * 0.05, ty = bob + s * 0.45, ta = Math.PI * 0.5, tr = s * 0.11;
+        for (let i = 0; i < 10; i++) {
+            A.orb(ctx, tx, ty, tr, tr, 0, A.tone(body, -0.06 * i > -0.5 ? -0.05 * i : -0.5), { specA: 0.2 });
+            ta += 0.55 + i * 0.02;
+            tx += Math.cos(ta) * tr * 1.5;
+            ty += Math.sin(ta) * tr * 1.5;
+            tr *= 0.85;
         }
-        // Dorsal fin
-        ctx.fillStyle = 'rgba(255,200,100,0.6)';
+        // dorsal fin: the little fluttering engine on the back
+        const flut = Math.sin(bug.wingPhase * 2) * s * 0.08;
+        const fg = ctx.createLinearGradient(-s * 0.3, bob, -s * 0.6, bob);
+        fg.addColorStop(0, A.tone(body, 0.3, 0.5));
+        fg.addColorStop(1, A.tone(body, 0.5, 0.1));
+        ctx.fillStyle = fg;
         ctx.beginPath();
-        ctx.ellipse(0, bob-size*0.1, size*0.15, size*0.3, 0, 0, Math.PI*2); ctx.fill();
-        // Head
-        ctx.fillStyle = '#FFE082';
-        ctx.beginPath(); ctx.arc(0, bob-size*0.4, size*0.2, 0, Math.PI*2); ctx.fill();
-        // Snout
-        ctx.fillStyle = '#FFD54F';
-        ctx.beginPath(); ctx.ellipse(size*0.25, bob-size*0.42, size*0.15, size*0.06, 0, 0, Math.PI*2); ctx.fill();
-        // Eye
-        ctx.fillStyle = 'white';
-        ctx.beginPath(); ctx.arc(size*0.08, bob-size*0.48, size*0.08, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle = '#111';
-        ctx.beginPath(); ctx.arc(size*0.09, bob-size*0.48, size*0.04, 0, Math.PI*2); ctx.fill();
-        // Coronet (crown)
-        ctx.fillStyle = '#FFAB00';
+        ctx.moveTo(-s * 0.24, bob - s * 0.15);
+        ctx.quadraticCurveTo(-s * 0.52 + flut, bob, -s * 0.24, bob + s * 0.2);
+        ctx.closePath();
+        ctx.fill();
+        // body: upright S-curve trunk with armor rings
+        A.orb(ctx, 0, bob + s * 0.05, s * 0.24, s * 0.42, 0.05, body, { specA: 0.3 });
+        ctx.strokeStyle = 'rgba(90,62,16,0.45)';
+        ctx.lineWidth = s * 0.03;
+        for (let k = 0; k < 5; k++) {
+            ctx.beginPath();
+            ctx.arc(0, bob - s * 0.25 + k * s * 0.17, s * 0.2 - k * 0.005 * s, Math.PI * 0.15, Math.PI * 0.85);
+            ctx.stroke();
+        }
+        // belly keel highlight
+        ctx.strokeStyle = 'rgba(255,235,180,0.4)';
+        ctx.lineWidth = s * 0.04;
         ctx.beginPath();
-        ctx.moveTo(-size*0.08, bob-size*0.58);
-        ctx.lineTo(-size*0.05, bob-size*0.72);
-        ctx.lineTo(0, bob-size*0.65);
-        ctx.lineTo(size*0.05, bob-size*0.72);
-        ctx.lineTo(size*0.08, bob-size*0.58);
-        ctx.closePath(); ctx.fill();
+        ctx.moveTo(s * 0.16, bob - s * 0.2);
+        ctx.quadraticCurveTo(s * 0.26, bob + s * 0.1, s * 0.1, bob + s * 0.4);
+        ctx.stroke();
+        // bony tubercle spikes down the spine
+        ctx.fillStyle = A.tone(body, -0.25);
+        for (let k = 0; k < 4; k++) {
+            const py = bob - s * 0.3 + k * s * 0.2;
+            ctx.beginPath();
+            ctx.moveTo(-s * 0.2, py);
+            ctx.lineTo(-s * 0.3, py + s * 0.03);
+            ctx.lineTo(-s * 0.2, py + s * 0.08);
+            ctx.closePath();
+            ctx.fill();
+        }
+        // head: horse-angled with tubular snout
+        ctx.save();
+        ctx.translate(0, bob - s * 0.5);
+        ctx.rotate(-0.5);
+        A.orb(ctx, 0, 0, s * 0.16, s * 0.2, 0, A.tone(body, 0.06), { specA: 0.3 });
+        // snout
+        ctx.strokeStyle = A.tone(body, -0.15);
+        ctx.lineCap = 'round';
+        ctx.lineWidth = s * 0.09;
+        ctx.beginPath(); ctx.moveTo(0, -s * 0.14); ctx.lineTo(s * 0.02, -s * 0.42); ctx.stroke();
+        // coronet: the little crown
+        ctx.fillStyle = A.tone(body, -0.3);
+        ctx.beginPath();
+        ctx.moveTo(-s * 0.1, -s * 0.16);
+        ctx.lineTo(-s * 0.06, -s * 0.3);
+        ctx.lineTo(0, -s * 0.18);
+        ctx.lineTo(s * 0.04, -s * 0.3);
+        ctx.lineTo(s * 0.08, -s * 0.16);
+        ctx.closePath();
+        ctx.fill();
+        A.face(ctx, 0, 0, s * 0.3, bug.wobble);
+        ctx.restore();
+        ctx.restore();
     }
 }

@@ -1,71 +1,64 @@
-# bugistan README
+# 🐛 Bugistan
 
-This is the README for your extension "bugistan". After writing up a brief description, we recommend including the following sections.
+> **Error aya, cockroach bhaga! Kill bugs with a slipper!** 🩴
+
+Bugistan turns the errors and warnings in your code into living, crawling bugs — and hands you a slipper to squash them with. But there's a catch: as long as the error still exists in your code, the bug keeps coming back. The only way to truly clear the screen is to **fix your code**.
+
+## How it works
+
+1. Open the **Bugistan** panel from the activity bar (🐛 icon).
+2. Every **error** 🔴 in your active file spawns a big bug. Every **warning** 🟡 spawns a smaller one (marked with a dashed yellow ring).
+3. Move your slipper cursor 🩴 around — bugs will panic and flee from it.
+4. **Click a bug to squash it.** Splat! +10 points for errors, +5 for warnings, with a combo multiplier for quick kills.
+5. Squashed bugs **respawn while the error still exists**. Fix the code and they're gone for good.
+
+Your total score lives in the status bar (`🐛 score 🩴`) and is saved between sessions.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+- 🎮 **Live diagnostics game** — bug count always mirrors the real errors/warnings in your active file
+- 🌍 **6 themed environments**, each with its own hand-drawn creatures (no image assets, all canvas):
+  - 🪵 **Mud Ground** — dragonflies, water scorpions, mole crickets…
+  - 🌿 **Grass Field** — ladybugs, grasshoppers, caterpillars…
+  - 🌙 **Night Sky** — fireflies, moths, glowworms…
+  - 🏜️ **Desert Sand** — scarabs, silver ants, antlions…
+  - 🌊 **Ocean Deep** — sharks, jellyfish, turtles…
+  - 🚀 **Space** — aliens, UFOs, space worms…
+- ⚡ **Combo counter** for kill streaks
+- 🔊 **Squish sound effects** — synthesized live with Web Audio (no audio files), pitch rises with your combo; mute anytime with the 🔊 button
+- 🏆 **Persistent score** across VS Code restarts
+- 💥 Squish particles, flee trails, panic rings — the works
 
-For example if there is an image subfolder under your extension project workspace:
+## Commands
 
-\!\[feature X\]\(images/feature-x.png\)
+| Command | What it does |
+|---|---|
+| `Bugistan: Start Bug Hunt 🐛` | Start spawning bugs from diagnostics |
+| `Bugistan: Stop Bug Hunt 🛑` | Stop the hunt and show your final score |
+| `Bugistan: Show Score 🏆` | Show your current score |
+| `Bugistan: Reset Score 🔄` | Reset your score to zero |
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+## Settings
+
+| Setting | Default | Description |
+|---|---|---|
+| `bugistan.enabled` | `true` | Start the bug hunt automatically on startup |
+| `bugistan.bugSpeed` | `medium` | Bug speed: `slow`, `medium`, `fast`, or `pakistani` (very, very fast) |
+| `bugistan.maxBugs` | `5` | Maximum number of bugs on screen at once |
+| `bugistan.soundEnabled` | `true` | Play squish sound effects when killing bugs |
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
-
-## Extension Settings
-
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+None. Bugistan uses VS Code's built-in diagnostics, so it works with whatever linters and language servers you already have.
 
 ## Known Issues
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+- Bugs are counted for the **active file only** — switching files respawns the swarm.
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
-
 ### 1.0.0
 
-Initial release of ...
+Initial release: 6 themes, ~38 creatures, combo system, persistent score.
 
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+**Enjoy squashing!** 🩴🐛

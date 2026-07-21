@@ -1,73 +1,58 @@
-// ── ALIEN: Green extraterrestrial, large head, big eyes ──────
+// ── ALIEN: grey-green visitor, obsidian eyes, gravity shimmer ──────
 class Alien {
     static draw(ctx, s, bob, bug) {
-        const size = s * 1.2;
-        // Antigravity glow
-        const glowGrad = ctx.createRadialGradient(0, bob, 0, 0, bob, size * 0.8);
-        glowGrad.addColorStop(0, 'rgba(100, 255, 100, 0.2)');
-        glowGrad.addColorStop(1, 'rgba(0, 255, 0, 0)');
-        ctx.fillStyle = glowGrad;
-        ctx.beginPath(); ctx.arc(0, bob, size * 0.8, 0, Math.PI * 2); ctx.fill();
-        // Large head
-        const headGrad = ctx.createRadialGradient(-size * 0.1, bob - size * 0.35, size * 0.05, 0, bob - size * 0.25, size * 0.6);
-        headGrad.addColorStop(0, '#69F0AE');
-        headGrad.addColorStop(0.5, '#00E676');
-        headGrad.addColorStop(1, '#00C853');
-        ctx.fillStyle = headGrad;
-        ctx.beginPath(); ctx.ellipse(0, bob - size * 0.3, size * 0.4, size * 0.5, 0, 0, Math.PI * 2); ctx.fill();
-        // Head outline
-        ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 1.5;
-        ctx.beginPath(); ctx.ellipse(0, bob - size * 0.3, size * 0.4, size * 0.5, 0, 0, Math.PI * 2); ctx.stroke();
-        // Large alien eyes
+        const skin = '#62e04e';
+        const hover = Math.sin(bug.wobble * 1.5) * s * 0.05;
+        const y = bob + hover;
+        // anti-grav distortion ring beneath
+        const ring = ctx.createRadialGradient(0, y + s * 0.85, s * 0.1, 0, y + s * 0.85, s * 0.6);
+        ring.addColorStop(0, 'rgba(120,220,190,0.20)');
+        ring.addColorStop(0.6, 'rgba(90,180,160,0.08)');
+        ring.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = ring;
+        ctx.beginPath(); ctx.ellipse(0, y + s * 0.85, s * 0.6, s * 0.16, 0, 0, Math.PI * 2); ctx.fill();
+        // slender trailing limbs, three-fingered
         for (let side = -1; side <= 1; side += 2) {
-            // Eye socket
-            ctx.fillStyle = '#1B5E20';
-            ctx.beginPath(); ctx.ellipse(side * size * 0.18, bob - size * 0.4, size * 0.16, size * 0.2, 0, 0, Math.PI * 2); ctx.fill();
-            // Eye
-            ctx.fillStyle = 'black';
-            ctx.beginPath(); ctx.ellipse(side * size * 0.18, bob - size * 0.4, size * 0.14, size * 0.18, 0, 0, Math.PI * 2); ctx.fill();
-            // Eye shine
-            ctx.fillStyle = 'white';
-            ctx.beginPath(); ctx.arc(side * size * 0.15, bob - size * 0.48, size * 0.05, 0, Math.PI * 2); ctx.fill();
-        }
-        // Tiny mouth
-        ctx.strokeStyle = '#00C853'; ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.arc(0, bob - size * 0.15, size * 0.06, 0.2, Math.PI - 0.2); ctx.stroke();
-        // Slender body
-        const bodyGrad = ctx.createLinearGradient(0, bob - size * 0.1, 0, bob + size * 0.4);
-        bodyGrad.addColorStop(0, '#69F0AE');
-        bodyGrad.addColorStop(1, '#00C853');
-        ctx.fillStyle = bodyGrad;
-        ctx.beginPath(); ctx.ellipse(0, bob + size * 0.15, size * 0.15, size * 0.3, 0, 0, Math.PI * 2); ctx.fill();
-        // Tiny arms
-        ctx.strokeStyle = '#69F0AE'; ctx.lineWidth = size * 0.06;
-        for (let side = -1; side <= 1; side += 2) {
+            const drift = Math.sin(bug.legPhase * 0.5 + side) * s * 0.06;
+            ctx.strokeStyle = A.tone(skin, -0.3);
+            ctx.lineCap = 'round';
+            ctx.lineWidth = s * 0.055;
+            // arm
             ctx.beginPath();
-            ctx.moveTo(side * size * 0.1, bob);
-            ctx.quadraticCurveTo(side * size * 0.4, bob - size * 0.1, side * size * 0.35, bob - size * 0.3);
+            ctx.moveTo(side * s * 0.2, y + s * 0.05);
+            ctx.quadraticCurveTo(side * s * 0.45, y + s * 0.25 + drift, side * s * 0.4, y + s * 0.5 + drift);
             ctx.stroke();
-            // Three fingers
-            ctx.fillStyle = '#69F0AE';
             for (let f = -1; f <= 1; f++) {
+                ctx.lineWidth = s * 0.025;
                 ctx.beginPath();
-                ctx.arc(side * size * 0.35 + f * size * 0.03, bob - size * 0.32, size * 0.03, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.moveTo(side * s * 0.4, y + s * 0.5 + drift);
+                ctx.lineTo(side * s * (0.4 + f * 0.06), y + s * 0.62 + drift);
+                ctx.stroke();
             }
+            // leg
+            ctx.lineWidth = s * 0.06;
+            ctx.beginPath();
+            ctx.moveTo(side * s * 0.1, y + s * 0.42);
+            ctx.quadraticCurveTo(side * s * 0.2, y + s * 0.62 - drift, side * s * 0.14, y + s * 0.82 - drift);
+            ctx.stroke();
         }
-        // Antenna
-        ctx.strokeStyle = '#69F0AE'; ctx.lineWidth = 1;
+        // narrow torso
+        A.orb(ctx, 0, y + s * 0.22, s * 0.2, s * 0.32, 0, A.tone(skin, -0.1), { specA: 0.2 });
+        // the head: oversized inverted teardrop cranium
+        ctx.save();
+        ctx.translate(0, y - s * 0.3);
+        const hg = ctx.createRadialGradient(-s * 0.14, -s * 0.2, s * 0.05, 0, -s * 0.05, s * 0.62);
+        hg.addColorStop(0, A.tone(skin, 0.4));
+        hg.addColorStop(0.5, skin);
+        hg.addColorStop(1, A.tone(skin, -0.5));
+        ctx.fillStyle = hg;
         ctx.beginPath();
-        ctx.moveTo(0, bob - size * 0.75);
-        ctx.quadraticCurveTo(size * 0.1, bob - size * 1.0, size * 0.15 + Math.sin(bug.antennaPhase) * size * 0.05, bob - size * 1.1);
-        ctx.stroke();
-        // Antenna bulb
-        const bulbGrad = ctx.createRadialGradient(0, 0, 0, size * 0.15, bob - size * 1.1, size * 0.08);
-        bulbGrad.addColorStop(0, '#FF0000');
-        bulbGrad.addColorStop(1, '#880000');
-        ctx.fillStyle = bulbGrad;
-        ctx.beginPath();
-        ctx.arc(size * 0.15 + Math.sin(bug.antennaPhase) * size * 0.05, bob - size * 1.1, size * 0.07, 0, Math.PI * 2);
+        ctx.moveTo(0, s * 0.42);
+        ctx.bezierCurveTo(-s * 0.4, s * 0.28, -s * 0.46, -s * 0.4, 0, -s * 0.42);
+        ctx.bezierCurveTo(s * 0.46, -s * 0.4, s * 0.4, s * 0.28, 0, s * 0.42);
         ctx.fill();
+        // the crying face on the big cranium
+        A.face(ctx, 0, s * 0.02, s * 0.55, bug.wobble);
+        ctx.restore();
     }
 }

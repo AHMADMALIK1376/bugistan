@@ -21,6 +21,8 @@ class GameViewProvider implements vscode.WebviewViewProvider {
     private currentErrorCount: number = 0;
     private currentWarningCount: number = 0;
 
+    constructor(private readonly context: vscode.ExtensionContext) {}
+
     // ----------------------------------------------------------
     // Called when the webview panel is created
     // ----------------------------------------------------------
@@ -52,7 +54,7 @@ class GameViewProvider implements vscode.WebviewViewProvider {
         }
 
         // Replace ALL theme folder script paths with proper webview URIs
-        const themeFolders = ['mud', 'grass', 'night', 'desert', 'ocean', 'space'];
+        const themeFolders = ['mud', 'grass', 'night', 'desert', 'ocean', 'space', 'candy', 'cyber'];
         for (const folder of themeFolders) {
             const folderPath = path.join(__dirname, '..', 'src', 'bugs', folder);
             if (fs.existsSync(folderPath)) {
@@ -66,11 +68,12 @@ class GameViewProvider implements vscode.WebviewViewProvider {
             }
         }
 
-        // Also resolve theme-registry.js
-        const registryPath = path.join(__dirname, '..', 'src', 'bugs', 'theme-registry.js');
-        const registryUri = vscode.Uri.file(registryPath);
-        const registryWebviewUri = webviewView.webview.asWebviewUri(registryUri);
-        html = html.replace('bugs/theme-registry.js', registryWebviewUri.toString());
+        // Also resolve theme-registry.js and the shared art toolkit
+        for (const shared of ['theme-registry.js', 'art.js']) {
+            const sharedPath = path.join(__dirname, '..', 'src', 'bugs', shared);
+            const sharedUri = webviewView.webview.asWebviewUri(vscode.Uri.file(sharedPath));
+            html = html.replace(`bugs/${shared}`, sharedUri.toString());
+        }
 
         webviewView.webview.html = html;
 
@@ -79,10 +82,27 @@ class GameViewProvider implements vscode.WebviewViewProvider {
             if (msg.command === 'bugKilled') {
                 score += msg.points || 10;
                 updateScoreBar();
+                this.context.globalState.update('bugistan.score', score);
             }
             if (msg.command === 'ready') {
+                this.sendConfig();
                 this.sendBugCounts(this.currentErrorCount, this.currentWarningCount);
             }
+        });
+    }
+
+    // ----------------------------------------------------------
+    // Send user settings (bug speed, max bugs) to the webview
+    // ----------------------------------------------------------
+    sendConfig() {
+        const config = vscode.workspace.getConfiguration('bugistan');
+        const speedMap: Record<string, number> = { slow: 0.6, medium: 1.0, fast: 1.6, pakistani: 2.5 };
+        const bugSpeed = config.get<string>('bugSpeed', 'medium');
+        this._view?.webview.postMessage({
+            command: 'setConfig',
+            speedMultiplier: speedMap[bugSpeed] ?? 1.0,
+            maxBugs: config.get<number>('maxBugs', 5),
+            soundEnabled: config.get<boolean>('soundEnabled', true)
         });
     }
 
@@ -135,6 +155,8 @@ html,body{width:100%;height:100vh;overflow:hidden;background:#1e1e1e;display:fle
 export function activate(context: vscode.ExtensionContext) {
     console.log('🐛 Bugistan activated!');
 
+    score = context.globalState.get<number>('bugistan.score', 0);
+
     scoreBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
     scoreBar.command = 'bugistan.showScore';
     updateScoreBar();
@@ -150,14 +172,28 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('bugistan.resetScore', () => {
             score = 0;
             updateScoreBar();
+            context.globalState.update('bugistan.score', 0);
             vscode.window.showInformationMessage('🔄 Score reset! 🩴');
         })
     );
 
-    gameViewProvider = new GameViewProvider();
+    gameViewProvider = new GameViewProvider(context);
     context.subscriptions.push(
         vscode.window.registerWebviewViewProvider('bugistan.gameView', gameViewProvider, {
             webviewOptions: { retainContextWhenHidden: true }
+        })
+    );
+
+    context.subscriptions.push(
+        vscode.workspace.onDidChangeConfiguration(e => {
+            if (!e.affectsConfiguration('bugistan')) { return; }
+            const cfg = vscode.workspace.getConfiguration('bugistan');
+            if (cfg.get('enabled', true)) {
+                if (!isActive) { startBugHunt(context); }
+            } else if (isActive) {
+                stopBugHunt();
+            }
+            gameViewProvider?.sendConfig();
         })
     );
 
@@ -179,9 +215,9 @@ function startBugHunt(context: vscode.ExtensionContext) {
     vscode.window.showInformationMessage('🐛 Bug hunt started! 🔴 Errors + 🟡 Warnings! 🩴');
 
     diagnosticListener = vscode.languages.onDidChangeDiagnostics(event => {
-        if (!isActive) return;
+        if (!isActive) {return;}
         const activeEditor = vscode.window.activeTextEditor;
-        if (!activeEditor) return;
+        if (!activeEditor) {return;}
         for (const uri of event.uris) {
             if (uri.toString() === activeEditor.document.uri.toString()) {
                 updateBugsForActiveFile(activeEditor);
@@ -192,7 +228,7 @@ function startBugHunt(context: vscode.ExtensionContext) {
     context.subscriptions.push(diagnosticListener);
 
     editorChangeListener = vscode.window.onDidChangeActiveTextEditor(editor => {
-        if (!isActive) return;
+        if (!isActive) {return;}
         if (editor) {
             updateBugsForActiveFile(editor);
         } else {
@@ -211,7 +247,7 @@ function startBugHunt(context: vscode.ExtensionContext) {
 // UPDATE BUGS - Detects Errors + Warnings
 // ============================================================
 function updateBugsForActiveFile(editor: vscode.TextEditor) {
-    if (!isActive || !gameViewProvider) return;
+    if (!isActive || !gameViewProvider) {return;}
 
     const diagnostics = vscode.languages.getDiagnostics(editor.document.uri);
 

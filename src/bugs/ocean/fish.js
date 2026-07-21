@@ -1,199 +1,80 @@
-// ── TROPICAL FISH: Flowing fins, swimming animation, vibrant colors ──────
+// ── REEF FISH: coral-red body, counter-shaded, flowing fins ──────
 class Fish {
     static draw(ctx, s, bob, bug) {
-        const size = s * 1.2;
-        const swimPhase = bug.wobble * 0.6;
-        
-        // ── FLOWING TAIL FIN ───────────────────────────────
-        const tailWave = Math.sin(swimPhase) * size * 0.12;
-        ctx.fillStyle = '#FF8C55';
+        const body = '#ff8c3a';
+        const swim = bug.wobble * 0.8;
+        const tailWave = Math.sin(swim) * s * 0.3;
+        // tail fin: forked, translucent, driving the motion
+        ctx.save();
+        ctx.translate(0, bob + s * 0.72);
+        ctx.rotate(tailWave * 0.4 / s * 2);
+        const tg = ctx.createLinearGradient(0, 0, 0, s * 0.6);
+        tg.addColorStop(0, A.tone(body, -0.1, 0.75));
+        tg.addColorStop(1, A.tone(body, 0.25, 0.3));
+        ctx.fillStyle = tg;
         ctx.beginPath();
-        ctx.moveTo(-size * 0.5, bob);
-        ctx.quadraticCurveTo(
-            -size * 0.75, bob - size * 0.4 + tailWave,
-            -size * 0.9 + tailWave, bob - size * 0.35
-        );
-        ctx.quadraticCurveTo(
-            -size * 0.7, bob + size * 0.1,
-            -size * 0.85, bob + size * 0.35
-        );
-        ctx.quadraticCurveTo(
-            -size * 0.6, bob + size * 0.05,
-            -size * 0.5, bob
-        );
-        ctx.closePath(); ctx.fill();
-        
-        // Tail fin rays
-        ctx.strokeStyle = 'rgba(255, 220, 180, 0.4)';
-        ctx.lineWidth = 0.8;
-        for (let r = -1; r <= 1; r++) {
+        ctx.moveTo(0, 0);
+        ctx.quadraticCurveTo(-s * 0.24 + tailWave, s * 0.34, -s * 0.3 + tailWave, s * 0.62);
+        ctx.quadraticCurveTo(0 + tailWave * 0.5, s * 0.4, s * 0.3 + tailWave, s * 0.62);
+        ctx.quadraticCurveTo(s * 0.24 + tailWave, s * 0.34, 0, 0);
+        ctx.fill();
+        ctx.restore();
+        // pectoral fins fanning at the sides
+        for (let side = -1; side <= 1; side += 2) {
+            ctx.save();
+            ctx.translate(side * s * 0.3, bob - s * 0.02);
+            ctx.rotate(side * (0.5 + Math.sin(swim + 1) * 0.25));
+            const pg = ctx.createLinearGradient(0, 0, side * s * 0.4, s * 0.2);
+            pg.addColorStop(0, A.tone(body, 0.2, 0.6));
+            pg.addColorStop(1, A.tone(body, 0.35, 0.12));
+            ctx.fillStyle = pg;
             ctx.beginPath();
-            ctx.moveTo(-size * 0.55, bob);
-            ctx.quadraticCurveTo(
-                -size * 0.7, bob + r * size * 0.2,
-                -size * 0.8 + tailWave, bob + r * size * 0.25
-            );
-            ctx.stroke();
-        }
-        
-        // ── OVAL BODY ──────────────────────────────────────
-        const bodyGrad = ctx.createLinearGradient(-size * 0.5, bob, size * 0.5, bob);
-        bodyGrad.addColorStop(0, '#FF6B35');
-        bodyGrad.addColorStop(0.3, '#FF8C42');
-        bodyGrad.addColorStop(0.6, '#FFAA55');
-        bodyGrad.addColorStop(1, '#FFCC80');
-        ctx.fillStyle = bodyGrad;
-        ctx.beginPath();
-        ctx.moveTo(-size * 0.45, bob - size * 0.22);
-        ctx.quadraticCurveTo(0, bob - size * 0.32, size * 0.4, bob - size * 0.2);
-        ctx.quadraticCurveTo(size * 0.5, bob, size * 0.4, bob + size * 0.22);
-        ctx.quadraticCurveTo(0, bob + size * 0.28, -size * 0.45, bob + size * 0.18);
-        ctx.closePath(); ctx.fill();
-        
-        // ── BODY OUTLINE ───────────────────────────────────
-        ctx.strokeStyle = 'rgba(200, 80, 30, 0.3)';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(-size * 0.45, bob - size * 0.22);
-        ctx.quadraticCurveTo(0, bob - size * 0.32, size * 0.4, bob - size * 0.2);
-        ctx.quadraticCurveTo(size * 0.5, bob, size * 0.4, bob + size * 0.22);
-        ctx.quadraticCurveTo(0, bob + size * 0.28, -size * 0.45, bob + size * 0.18);
-        ctx.closePath(); ctx.stroke();
-        
-        // ── SCALES PATTERN ─────────────────────────────────
-        ctx.strokeStyle = 'rgba(255, 220, 180, 0.35)';
-        ctx.lineWidth = 0.7;
-        for (let row = 0; row < 3; row++) {
-            for (let col = -1; col <= 1; col++) {
-                const sx = col * size * 0.2;
-                const sy = bob - size * 0.08 + row * size * 0.12;
-                ctx.beginPath();
-                ctx.arc(sx, sy, size * 0.07, 0, Math.PI);
-                ctx.stroke();
-            }
-        }
-        
-        // ── LATERAL LINE ───────────────────────────────────
-        ctx.strokeStyle = 'rgba(255, 200, 150, 0.4)';
-        ctx.lineWidth = 1.2;
-        ctx.setLineDash([3, 4]);
-        ctx.beginPath();
-        ctx.moveTo(-size * 0.4, bob - size * 0.02);
-        ctx.quadraticCurveTo(0, bob - size * 0.05, size * 0.35, bob - size * 0.02);
-        ctx.stroke();
-        ctx.setLineDash([]);
-        
-        // ── FLOWING DORSAL FIN ─────────────────────────────
-        const dorsalWave = Math.sin(swimPhase * 1.3) * size * 0.08;
-        ctx.fillStyle = 'rgba(255, 150, 80, 0.8)';
-        ctx.beginPath();
-        ctx.moveTo(-size * 0.15, bob - size * 0.25);
-        ctx.quadraticCurveTo(
-            size * 0.05, bob - size * 0.55 + dorsalWave,
-            size * 0.2, bob - size * 0.22
-        );
-        ctx.quadraticCurveTo(
-            size * 0.1, bob - size * 0.2,
-            -size * 0.1, bob - size * 0.22
-        );
-        ctx.closePath(); ctx.fill();
-        
-        // Dorsal fin rays
-        ctx.strokeStyle = 'rgba(255, 200, 150, 0.4)';
-        ctx.lineWidth = 0.6;
-        for (let r = 0; r < 3; r++) {
-            const rx = -size * 0.1 + r * size * 0.1;
-            ctx.beginPath();
-            ctx.moveTo(rx, bob - size * 0.23);
-            ctx.quadraticCurveTo(
-                rx + size * 0.05,
-                bob - size * 0.45 + dorsalWave,
-                rx + size * 0.08,
-                bob - size * 0.55 + dorsalWave
-            );
-            ctx.stroke();
-        }
-        
-        // ── FLOWING PECTORAL FIN ──────────────────────────
-        const pectoralWave = Math.sin(swimPhase + 1) * size * 0.08;
-        ctx.fillStyle = 'rgba(255, 140, 80, 0.55)';
-        ctx.beginPath();
-        ctx.moveTo(-size * 0.1, bob + size * 0.1);
-        ctx.quadraticCurveTo(
-            -size * 0.25, bob + size * 0.35 + pectoralWave,
-            size * 0.05, bob + size * 0.2
-        );
-        ctx.quadraticCurveTo(
-            size * 0.02, bob + size * 0.12,
-            -size * 0.05, bob + size * 0.08
-        );
-        ctx.closePath(); ctx.fill();
-        
-        // ── VENTRAL FIN ────────────────────────────────────
-        ctx.fillStyle = 'rgba(255, 140, 80, 0.5)';
-        ctx.beginPath();
-        ctx.moveTo(-size * 0.2, bob + size * 0.18);
-        ctx.quadraticCurveTo(
-            -size * 0.22, bob + size * 0.35,
-            -size * 0.15, bob + size * 0.2
-        );
-        ctx.quadraticCurveTo(
-            -size * 0.18, bob + size * 0.16,
-            -size * 0.2, bob + size * 0.18
-        );
-        ctx.closePath(); ctx.fill();
-        
-        // ── LARGE EXPRESSIVE EYE ───────────────────────────
-        // Eye socket
-        ctx.fillStyle = '#CC4400';
-        ctx.beginPath();
-        ctx.arc(size * 0.28, bob - size * 0.06, size * 0.13, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // Eye white
-        ctx.fillStyle = 'white';
-        ctx.beginPath();
-        ctx.arc(size * 0.28, bob - size * 0.06, size * 0.1, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // Iris
-        ctx.fillStyle = '#111';
-        ctx.beginPath();
-        ctx.arc(size * 0.3, bob - size * 0.06, size * 0.06, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // Eye gleam
-        ctx.fillStyle = 'white';
-        ctx.beginPath();
-        ctx.arc(size * 0.28, bob - size * 0.09, size * 0.03, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // ── CUTE MOUTH ─────────────────────────────────────
-        ctx.strokeStyle = '#CC4400';
-        ctx.lineWidth = 0.8;
-        ctx.beginPath();
-        ctx.arc(size * 0.4, bob + size * 0.06, size * 0.06, 0.2, Math.PI - 0.2);
-        ctx.stroke();
-        
-        // ── RISING BUBBLES ─────────────────────────────────
-        const bubblePhase = (bug.wobble * 3) % (Math.PI * 2);
-        for (let b = 0; b < 2; b++) {
-            const bx = size * 0.45 + b * size * 0.1;
-            const by = bob - size * 0.2 - b * size * 0.15 - Math.sin(bubblePhase + b) * size * 0.1;
-            ctx.fillStyle = 'rgba(200, 230, 255, 0.35)';
-            ctx.beginPath();
-            ctx.arc(bx, by, size * 0.04 + b * size * 0.02, 0, Math.PI * 2);
+            ctx.moveTo(0, 0);
+            ctx.quadraticCurveTo(side * s * 0.42, s * 0.06, side * s * 0.34, s * 0.32);
+            ctx.quadraticCurveTo(side * s * 0.12, s * 0.2, 0, 0);
             ctx.fill();
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.restore();
+        }
+        // body: deep oval, counter-shaded dark above / pale below
+        ctx.save();
+        ctx.translate(0, bob);
+        const bg = ctx.createLinearGradient(-s * 0.4, 0, s * 0.4, 0);
+        bg.addColorStop(0, A.tone(body, -0.45));
+        bg.addColorStop(0.42, body);
+        bg.addColorStop(0.75, A.tone(body, 0.35));
+        bg.addColorStop(1, '#ffe4c0');
+        ctx.fillStyle = bg;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, s * 0.4, s * 0.72, 0, 0, Math.PI * 2);
+        ctx.fill();
+        // vertical bar markings
+        ctx.fillStyle = 'rgba(50,22,10,0.28)';
+        for (let k = 0; k < 3; k++) {
             ctx.beginPath();
-            ctx.arc(bx - size * 0.01, by - size * 0.01, size * 0.015, 0, Math.PI * 2);
+            ctx.ellipse(0, -s * 0.34 + k * s * 0.34, s * 0.36 - k * 0.03 * s, s * 0.08, 0, 0, Math.PI * 2);
             ctx.fill();
         }
-        
-        // ── BODY SHINE ─────────────────────────────────────
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+        // scale shimmer
+        const sh = ctx.createRadialGradient(-s * 0.14, -s * 0.2, 0, -s * 0.14, -s * 0.2, s * 0.5);
+        sh.addColorStop(0, 'rgba(255,235,210,0.35)');
+        sh.addColorStop(1, 'rgba(255,235,210,0)');
+        ctx.fillStyle = sh;
+        ctx.beginPath(); ctx.ellipse(0, 0, s * 0.4, s * 0.72, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+        // dorsal fin ridge
+        ctx.strokeStyle = A.tone(body, -0.3, 0.8);
+        ctx.lineWidth = s * 0.06;
+        ctx.lineCap = 'round';
         ctx.beginPath();
-        ctx.ellipse(-size * 0.05, bob - size * 0.1, size * 0.15, size * 0.06, -0.2, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.moveTo(-s * 0.38, bob - s * 0.2);
+        ctx.quadraticCurveTo(-s * 0.56, bob + s * 0.05, -s * 0.4, bob + s * 0.3);
+        ctx.stroke();
+        // head details: gill line + realistic round eye
+        ctx.strokeStyle = 'rgba(60,26,12,0.5)';
+        ctx.lineWidth = s * 0.035;
+        ctx.beginPath();
+        ctx.arc(0, bob - s * 0.3, s * 0.26, Math.PI * 0.25, Math.PI * 0.75);
+        ctx.stroke();
+        A.face(ctx, 0, bob - s * 0.4, s * 0.5, bug.wobble);
     }
 }

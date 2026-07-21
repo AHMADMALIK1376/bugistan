@@ -1,45 +1,37 @@
-// ── DARKLING BEETLE: Black matte shell, slow moving ──────
+// ── DARKLING BEETLE: matte charcoal tank, head-down stance ──────
 class DarklingBeetle {
     static draw(ctx, s, bob, bug) {
-        const size = s * 1.2;
-        // Stubby legs
-        ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = size * 0.1; ctx.lineCap = 'round';
-        for (let side = -1; side <= 1; side += 2) {
-            for (let i = -1; i <= 1; i++) {
-                const legY = bob + i * (size * 0.3);
-                const movement = Math.sin(bug.legPhase + i) * (size * 0.1);
-                ctx.beginPath();
-                ctx.moveTo(side * size * 0.15, legY);
-                ctx.lineTo(side * size * 0.5 + movement, legY + size * 0.2);
-                ctx.stroke();
+        const shell = '#7a5cc0';
+        // thick slow legs
+        A.legSet(ctx, s, bob, bug.legPhase * 0.6, '#4c3680', { reach: 1.1, w: s * 0.08 });
+        // heavy matte dome: minimal specular — darklings absorb light
+        A.orb(ctx, 0, bob + s * 0.1, s * 0.52, s * 0.66, 0, shell, { specA: 0.1, lit: 0.22 });
+        // fused elytra: no split flight line, just a faint seam
+        ctx.strokeStyle = 'rgba(60,52,44,0.5)';
+        ctx.lineWidth = 0.8;
+        ctx.beginPath(); ctx.moveTo(0, bob - s * 0.4); ctx.lineTo(0, bob + s * 0.7); ctx.stroke();
+        // rows of dimpled micro-sculpture
+        ctx.fillStyle = 'rgba(66,58,50,0.4)';
+        for (let r = 0; r < 3; r++) {
+            for (let k = 0; k < 5; k++) {
+                for (let side = -1; side <= 1; side += 2) {
+                    ctx.beginPath();
+                    ctx.arc(side * s * (0.12 + r * 0.13), bob - s * 0.22 + k * s * 0.2, s * 0.022, 0, Math.PI * 2);
+                    ctx.fill();
+                }
             }
         }
-        // Dark round body
-        const bodyGrad = ctx.createRadialGradient(-size*0.15, bob-size*0.15, size*0.05, 0, bob, size*0.75);
-        bodyGrad.addColorStop(0, '#3A3A3A'); bodyGrad.addColorStop(0.5, '#1A1A1A'); bodyGrad.addColorStop(1, '#0A0A0A');
-        ctx.fillStyle = bodyGrad;
-        ctx.beginPath(); ctx.arc(0, bob, size*0.65, 0, Math.PI*2); ctx.fill();
-        // Matte texture
-        ctx.fillStyle = 'rgba(40,40,40,0.3)';
-        for (let i = 0; i < 6; i++) {
-            ctx.beginPath();
-            ctx.arc((Math.sin(i*2)-0.5)*size*0.3, bob+(Math.cos(i*2)-0.5)*size*0.3, size*0.05, 0, Math.PI*2);
-            ctx.fill();
-        }
-        // Head
-        ctx.fillStyle = '#222';
-        ctx.beginPath(); ctx.arc(0, bob-size*0.7, size*0.25, 0, Math.PI*2); ctx.fill();
-        // Tiny eyes
-        ctx.fillStyle = '#FFD700';
-        ctx.beginPath(); ctx.arc(-size*0.1, bob-size*0.75, size*0.05, 0, Math.PI*2); ctx.fill();
-        ctx.beginPath(); ctx.arc(size*0.1, bob-size*0.75, size*0.05, 0, Math.PI*2); ctx.fill();
-        // Antennae
-        ctx.strokeStyle = '#333'; ctx.lineWidth = 0.7;
-        for (let side = -1; side <= 1; side += 2) {
-            ctx.beginPath();
-            ctx.moveTo(side*size*0.06, bob-size*0.9);
-            ctx.lineTo(side*size*0.2, bob-size*1.15);
-            ctx.stroke();
-        }
+        // dusty desert bloom on the shell's crown
+        const dust = ctx.createRadialGradient(-s * 0.14, bob - s * 0.14, 0, -s * 0.14, bob - s * 0.14, s * 0.42);
+        dust.addColorStop(0, 'rgba(150,132,105,0.14)');
+        dust.addColorStop(1, 'rgba(150,132,105,0)');
+        ctx.fillStyle = dust;
+        ctx.beginPath(); ctx.ellipse(0, bob + s * 0.1, s * 0.52, s * 0.66, 0, 0, Math.PI * 2); ctx.fill();
+        // pronotum collar
+        A.orb(ctx, 0, bob - s * 0.44, s * 0.3, s * 0.18, 0, '#6a4cb0', { specA: 0.12 });
+        // head angled down in the classic butt-up posture
+        A.orb(ctx, 0, bob - s * 0.62, s * 0.16, s * 0.12, 0, '#8a6ccc', {});
+        A.face(ctx, 0, bob - s * 0.6, s * 0.44, bug.wobble);
+        A.antennae(ctx, s * 0.6, bob - s * 0.68, bug.antennaPhase, '#3e2a6a', { len: 0.6, club: true });
     }
 }

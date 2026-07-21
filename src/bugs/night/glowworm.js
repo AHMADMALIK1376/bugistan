@@ -1,37 +1,52 @@
-// ── GLOWWORM: Segmented glowing body, slow crawling ──────
+// ── GLOWWORM: armored larval plates, cold blue-green lamps ──────
 class Glowworm {
     static draw(ctx, s, bob, bug) {
-        const size = s * 1.0;
-        // Glow aura
-        const pulse = Math.sin(bug.wobble * 2) * 0.3 + 0.7;
-        const glowGrad = ctx.createRadialGradient(0, bob+size*0.2, 0, 0, bob+size*0.2, size*0.4);
-        glowGrad.addColorStop(0, `rgba(100, 255, 100, ${pulse * 0.5})`);
-        glowGrad.addColorStop(1, 'rgba(0, 255, 0, 0)');
-        ctx.fillStyle = glowGrad;
-        ctx.beginPath(); ctx.arc(0, bob+size*0.2, size*0.4, 0, Math.PI*2); ctx.fill();
-        // Segmented body
-        const segs = 5;
-        for (let i = segs-1; i >= 0; i--) {
-            const segX = (i-(segs-1)/2)*size*0.3;
-            const segY = bob+Math.sin(bug.legPhase+i)*size*0.1;
-            const r = size*0.2;
-            const segG = ctx.createRadialGradient(segX, segY-r*0.2, 0, segX, segY, r);
-            segG.addColorStop(0, i >= 3 ? `rgba(150,255,150,${pulse})` : '#2E7D32');
-            segG.addColorStop(0.5, '#1B5E20'); segG.addColorStop(1, '#0A3300');
-            ctx.fillStyle = segG;
-            ctx.beginPath(); ctx.arc(segX, segY, r, 0, Math.PI*2); ctx.fill();
-            // Segment glow
-            if (i >= 3) {
-                ctx.fillStyle = `rgba(100,255,100,${pulse*0.4})`;
-                ctx.beginPath(); ctx.arc(segX, segY, r*0.6, 0, Math.PI*2); ctx.fill();
+        const body = '#3ec9a0';
+        const n = 7;
+        const pulse = 0.5 + Math.sin(bug.wobble * 1.4) * 0.5;
+        // soft ambient light spilling from the tail lamps
+        A.glow(ctx, 0, bob + s * 0.9, s * (1.2 + pulse * 0.8), '#ffd166', 0.12 + pulse * 0.16);
+        // stubby legs on the front segments
+        for (let i = 0; i < 3; i++) {
+            for (let side = -1; side <= 1; side += 2) {
+                ctx.strokeStyle = A.tone(body, -0.4);
+                ctx.lineCap = 'round';
+                ctx.lineWidth = s * 0.05;
+                const ly = bob - s * 0.35 + i * s * 0.24;
+                ctx.beginPath();
+                ctx.moveTo(side * s * 0.16, ly);
+                ctx.lineTo(side * s * 0.28, ly + s * 0.14);
+                ctx.stroke();
             }
         }
-        // Head
-        ctx.fillStyle = '#1A3300';
-        ctx.beginPath(); ctx.arc((0-(segs-1)/2)*size*0.3, bob, size*0.18, 0, Math.PI*2); ctx.fill();
-        // Tiny eyes
-        ctx.fillStyle = '#FFD700';
-        ctx.beginPath(); ctx.arc((0-(segs-1)/2)*size*0.3-size*0.06, bob-size*0.05, size*0.04, 0, Math.PI*2); ctx.fill();
-        ctx.beginPath(); ctx.arc((0-(segs-1)/2)*size*0.3+size*0.06, bob-size*0.05, size*0.04, 0, Math.PI*2); ctx.fill();
+        // armored segments: each an overlapping plate
+        for (let i = n - 1; i >= 0; i--) {
+            const sy = bob - s * 0.45 + i * s * 0.24;
+            const sway = Math.sin(bug.wobble * 0.6 + i * 0.6) * s * 0.05;
+            const r = s * (0.2 - Math.abs(i - 3) * 0.01);
+            A.orb(ctx, sway, sy, r * 1.15, r, 0, body, { specA: 0.2 });
+            // plate edge highlight
+            ctx.strokeStyle = 'rgba(255,190,160,0.25)';
+            ctx.lineWidth = 0.6;
+            ctx.beginPath();
+            ctx.arc(sway, sy - r * 0.15, r * 0.9, Math.PI * 1.15, Math.PI * 1.85);
+            ctx.stroke();
+        }
+        // the paired light organs on the last two segments
+        for (let k = 0; k < 2; k++) {
+            const sy = bob - s * 0.45 + (n - 1 - k) * s * 0.24;
+            for (let side = -1; side <= 1; side += 2) {
+                const lg = ctx.createRadialGradient(side * s * 0.09, sy, 0, side * s * 0.09, sy, s * 0.12);
+                lg.addColorStop(0, `rgba(255,236,190,${0.55 + pulse * 0.45})`);
+                lg.addColorStop(0.6, `rgba(255,200,120,${0.35 + pulse * 0.35})`);
+                lg.addColorStop(1, 'rgba(230,150,70,0.05)');
+                ctx.fillStyle = lg;
+                ctx.beginPath(); ctx.arc(side * s * 0.09, sy, s * 0.1, 0, Math.PI * 2); ctx.fill();
+            }
+        }
+        // small hardened head
+        A.orb(ctx, 0, bob - s * 0.6, s * 0.12, s * 0.11, 0, '#2eb890', {});
+        A.face(ctx, 0, bob - s * 0.58, s * 0.36, bug.wobble);
+        A.antennae(ctx, s * 0.4, bob - s * 0.66, bug.antennaPhase, '#248064', { len: 0.4 });
     }
 }

@@ -1,59 +1,81 @@
-// ── CRAB: Side-walking, big claws, round shell ──────
+// ── CRAB: rust-red armor, jointed walkers, asymmetric claws ──────
 class Crab {
     static draw(ctx, s, bob, bug) {
-        const size = s * 1.2;
-        // Walking legs
-        ctx.strokeStyle = '#C62828'; ctx.lineWidth = size * 0.08; ctx.lineCap = 'round';
+        const shell = '#ff5a3c';
+        // four walking legs per side, properly jointed
         for (let side = -1; side <= 1; side += 2) {
-            for (let i = 0; i < 3; i++) {
-                const lx = side*size*0.2;
-                const ly = bob + size*0.1 + i*size*0.15;
-                ctx.beginPath();
-                ctx.moveTo(lx, ly);
-                ctx.quadraticCurveTo(side*size*0.6, ly+size*0.15, side*size*0.7, ly+size*0.25);
-                ctx.stroke();
-                // Leg tip
-                ctx.fillStyle = '#8B0000';
-                ctx.beginPath();
-                ctx.arc(side*size*0.7, ly+size*0.25, size*0.04, 0, Math.PI*2); ctx.fill();
+            for (let i = 0; i < 4; i++) {
+                const step = Math.sin(bug.legPhase * 1.2 + i * 1.5 + (side > 0 ? Math.PI : 0)) * s * 0.1;
+                const hipX = side * s * 0.4;
+                const hipY = bob + (i - 1.5) * s * 0.16;
+                const kneeX = side * s * (0.72 + i * 0.04);
+                const kneeY = hipY - s * 0.18 + step * 0.5;
+                const footX = side * s * (0.95 + i * 0.05);
+                const footY = hipY + s * 0.24 + step;
+                ctx.strokeStyle = '#a03018';
+                ctx.lineCap = 'round';
+                ctx.lineWidth = s * 0.07;
+                ctx.beginPath(); ctx.moveTo(hipX, hipY); ctx.lineTo(kneeX, kneeY); ctx.stroke();
+                ctx.lineWidth = s * 0.045;
+                ctx.beginPath(); ctx.moveTo(kneeX, kneeY); ctx.lineTo(footX, footY); ctx.stroke();
+                // lit top edge on the femur
+                ctx.strokeStyle = 'rgba(240,150,110,0.3)';
+                ctx.lineWidth = s * 0.02;
+                ctx.beginPath(); ctx.moveTo(hipX, hipY - s * 0.02); ctx.lineTo(kneeX, kneeY - s * 0.02); ctx.stroke();
             }
         }
-        // Big claws
+        // carapace: wide shield with bumpy margins
+        A.orb(ctx, 0, bob, s * 0.62, s * 0.46, 0, shell, { specA: 0.34 });
+        // margin teeth
+        ctx.fillStyle = '#e04426';
         for (let side = -1; side <= 1; side += 2) {
-            ctx.strokeStyle = '#B71C1C'; ctx.lineWidth = size * 0.12;
-            ctx.beginPath();
-            ctx.moveTo(side*size*0.25, bob-size*0.2);
-            ctx.quadraticCurveTo(side*size*0.7, bob-size*0.4, side*size*0.6, bob-size*0.3);
-            ctx.stroke();
-            // Claw pincer
-            ctx.fillStyle = '#D32F2F';
-            ctx.beginPath(); ctx.arc(side*size*0.65, bob-size*0.35, size*0.2, 0, Math.PI*2); ctx.fill();
-            // Claw opening
-            ctx.fillStyle = '#FFCDD2';
-            ctx.beginPath();
-            ctx.arc(side*size*0.7, bob-size*0.4, size*0.08, 0, Math.PI); ctx.fill();
+            for (let k = 0; k < 3; k++) {
+                const a = Math.PI * (1.5 + side * (0.14 + k * 0.1));
+                ctx.beginPath();
+                ctx.arc(Math.cos(a) * s * 0.6, bob + Math.sin(a) * s * 0.44, s * 0.045, 0, Math.PI * 2);
+                ctx.fill();
+            }
         }
-        // Round shell
-        const shellGrad = ctx.createRadialGradient(-size*0.1, bob-size*0.05, size*0.05, 0, bob, size*0.55);
-        shellGrad.addColorStop(0, '#E53935'); shellGrad.addColorStop(0.5, '#C62828'); shellGrad.addColorStop(1, '#7F0000');
-        ctx.fillStyle = shellGrad;
-        ctx.beginPath(); ctx.arc(0, bob, size*0.45, 0, Math.PI*2); ctx.fill();
-        // Shell pattern
-        ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 1;
+        // carapace regions: the H-shaped gastric grooves
+        ctx.strokeStyle = 'rgba(60,16,8,0.4)';
+        ctx.lineWidth = s * 0.03;
         ctx.beginPath();
-        ctx.moveTo(0, bob-size*0.4);
-        ctx.quadraticCurveTo(size*0.2, bob-size*0.1, 0, bob+size*0.2);
+        ctx.moveTo(-s * 0.16, bob - s * 0.24);
+        ctx.quadraticCurveTo(0, bob - s * 0.05, s * 0.16, bob - s * 0.24);
         ctx.stroke();
-        // Eye stalks
+        ctx.beginPath();
+        ctx.moveTo(-s * 0.2, bob + s * 0.12);
+        ctx.quadraticCurveTo(0, bob + s * 0.24, s * 0.2, bob + s * 0.12);
+        ctx.stroke();
+        // claws: one big crusher, one smaller cutter
         for (let side = -1; side <= 1; side += 2) {
-            ctx.strokeStyle = '#B71C1C'; ctx.lineWidth = size * 0.06;
+            const big = side < 0;
+            const cs = big ? 1.0 : 0.72;
+            const snap = Math.max(0, Math.sin(bug.legPhase * 0.8 + side)) * 0.2;
+            ctx.save();
+            ctx.translate(side * s * 0.5, bob - s * 0.42);
+            ctx.rotate(side * -0.35);
+            // arm
+            ctx.strokeStyle = '#a03018';
+            ctx.lineCap = 'round';
+            ctx.lineWidth = s * 0.09 * cs;
+            ctx.beginPath(); ctx.moveTo(side * -s * 0.1, s * 0.2); ctx.lineTo(0, 0); ctx.stroke();
+            // palm
+            A.orb(ctx, side * s * 0.08, -s * 0.1, s * 0.2 * cs, s * 0.15 * cs, side * 0.3, '#ff7a5c', { specA: 0.4 });
+            // fixed + moving fingers
+            ctx.strokeStyle = '#702210';
+            ctx.lineWidth = s * 0.05 * cs;
             ctx.beginPath();
-            ctx.moveTo(side*size*0.1, bob-size*0.35);
-            ctx.lineTo(side*size*0.15, bob-size*0.55);
+            ctx.moveTo(side * s * 0.16 * cs, -s * 0.18 * cs);
+            ctx.quadraticCurveTo(side * s * 0.3 * cs, -s * 0.3 * cs, side * s * 0.2 * cs, -s * 0.42 * cs);
             ctx.stroke();
-            // Eye
-            ctx.fillStyle = '#111';
-            ctx.beginPath(); ctx.arc(side*size*0.15, bob-size*0.55, size*0.06, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(side * s * 0.04, -s * 0.2 * cs);
+            ctx.quadraticCurveTo(side * (s * 0.06 - snap * s * 0.1), -s * 0.36 * cs, side * (s * 0.14 * cs - snap * s * 0.16), -s * 0.44 * cs);
+            ctx.stroke();
+            ctx.restore();
         }
+        // the crying face on the carapace
+        A.face(ctx, 0, bob - s * 0.08, s * 0.55, bug.wobble);
     }
 }

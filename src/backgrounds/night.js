@@ -1,131 +1,98 @@
 // ============================================================
-// UPGRADED NIGHT SKY - Moving clouds, stars, moon
+// NIGHT - flat vector night
+// Deep indigo gradient, soft star dots, a smooth cream moon,
+// rolling hill silhouettes. Line-less and quiet.
 // ============================================================
 function drawNightBackground() {
     const t = frame * 0.005;
-    
-    // ── NIGHT SKY GRADIENT ─────────────────────────────────
+
+    // ── smooth indigo sky ───────────────────────────────────
     const sky = ctx.createLinearGradient(0, 0, 0, H);
-    sky.addColorStop(0, '#0a0a2e');
-    sky.addColorStop(0.3, '#0d0d35');
-    sky.addColorStop(0.5, '#1a1a3e');
-    sky.addColorStop(0.7, '#151530');
-    sky.addColorStop(1, '#0d1b2a');
+    sky.addColorStop(0, '#232a5c');
+    sky.addColorStop(0.55, '#2e3676');
+    sky.addColorStop(1, '#252c62');
     ctx.fillStyle = sky;
     ctx.fillRect(0, 0, W, H);
-    
-    // ── DISTANT HILLS SILHOUETTE ───────────────────────────
-    ctx.fillStyle = '#060615';
-    ctx.beginPath(); ctx.moveTo(0, H);
-    ctx.quadraticCurveTo(W * 0.2, H * 0.78, W * 0.4, H * 0.82);
-    ctx.quadraticCurveTo(W * 0.6, H * 0.76, W * 0.8, H * 0.8);
-    ctx.quadraticCurveTo(W * 0.9, H * 0.77, W, H * 0.79);
-    ctx.lineTo(W, H); ctx.closePath(); ctx.fill();
-    
-    // Pine tree silhouettes
-    for (let i = 0; i < 8; i++) {
-        const tx = W * (0.05 + i * 0.12);
-        const th = 30 + (i % 4) * 20;
-        ctx.fillStyle = '#050510';
-        // Trunk
-        ctx.fillRect(tx - 1.5, H * 0.8 - th * 0.3, 3, th * 0.3);
-        // Triangular layers
-        for (let layer = 0; layer < 4; layer++) {
-            const ty = H * 0.8 - th * (0.2 + layer * 0.2);
-            const tw = th * (0.3 - layer * 0.06);
-            ctx.beginPath();
-            ctx.moveTo(tx, ty - th * 0.15);
-            ctx.lineTo(tx + tw, ty);
-            ctx.lineTo(tx - tw, ty);
-            ctx.closePath(); ctx.fill();
-        }
+
+    // ── soft star dots, slow twinkle ────────────────────────
+    for (let i = 0; i < 60; i++) {
+        const sx = A.hash(i * 1.9) * W;
+        const sy = A.hash(i * 3.7) * H * 0.8;
+        const tw = 0.3 + 0.5 * Math.abs(Math.sin(t * 1.5 + i));
+        ctx.fillStyle = `rgba(240,240,250,${tw * 0.6})`;
+        ctx.beginPath(); ctx.arc(sx, sy, 0.8 + A.hash(i * 5.1) * 1.2, 0, Math.PI * 2); ctx.fill();
     }
-    
-    // ── MOVING CLOUDS ──────────────────────────────────────
-    for (let i = 0; i < 6; i++) {
-        const cx = ((frame * 0.2 + i * 250) % (W + 300)) - 150;
-        const cy = 30 + (i * 45) % (H * 0.5);
-        const cs = 0.4 + (i % 3) * 0.3;
-        const cloudAlpha = 0.06 + (i % 3) * 0.04;
-        
-        ctx.fillStyle = `rgba(200, 200, 220, ${cloudAlpha})`;
-        
-        // Cloud puffs
-        ctx.beginPath(); ctx.arc(cx, cy, 25 * cs, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(cx + 20 * cs, cy - 8 * cs, 18 * cs, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(cx - 18 * cs, cy - 5 * cs, 15 * cs, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(cx + 38 * cs, cy + 2 * cs, 20 * cs, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(cx + 10 * cs, cy - 12 * cs, 14 * cs, 0, Math.PI * 2); ctx.fill();
-        
-        // Darker cloud bottom
-        ctx.fillStyle = `rgba(150, 150, 180, ${cloudAlpha * 0.7})`;
-        ctx.beginPath(); ctx.arc(cx + 5 * cs, cy + 5 * cs, 20 * cs, 0, Math.PI * 2); ctx.fill();
+    // a few larger soft glows
+    for (let i = 0; i < 5; i++) {
+        const sx = A.hash(i * 17.3) * W;
+        const sy = A.hash(i * 19.1) * H * 0.7;
+        const tw = 0.3 + 0.5 * Math.abs(Math.sin(t * 2 + i * 2.3));
+        A.glow(ctx, sx, sy, 8, '#e8e8ff', tw * 0.4);
+        ctx.fillStyle = `rgba(250,250,255,${tw})`;
+        ctx.beginPath(); ctx.arc(sx, sy, 1.6, 0, Math.PI * 2); ctx.fill();
     }
-    
-    // ── FASTER HIGH CLOUDS ─────────────────────────────────
+
+    // ── smooth cream moon with flat craters ─────────────────
+    const mx = W * 0.72, my = H * 0.22, mr = Math.min(W, H) * 0.095 + 12;
+    A.glow(ctx, mx, my, mr * 2.8, '#fdf3cd', 0.2);
+    const moon = ctx.createLinearGradient(mx, my - mr, mx, my + mr);
+    moon.addColorStop(0, '#fdf3d3');
+    moon.addColorStop(1, '#ecd394');
+    ctx.fillStyle = moon;
+    ctx.beginPath(); ctx.arc(mx, my, mr, 0, Math.PI * 2); ctx.fill();
     for (let i = 0; i < 4; i++) {
-        const hcx = ((frame * 0.35 + i * 300) % (W + 250)) - 125;
-        const hcy = 20 + (i * 55) % (H * 0.35);
-        
-        ctx.fillStyle = 'rgba(180, 190, 210, 0.04)';
-        ctx.beginPath(); ctx.arc(hcx, hcy, 20, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(hcx + 15, hcy - 5, 15, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(hcx - 12, hcy - 3, 12, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(hcx + 28, hcy + 1, 16, 0, Math.PI * 2); ctx.fill();
+        const a = A.hash(i * 7.1) * Math.PI * 2;
+        const d = A.hash(i * 9.3) * mr * 0.55;
+        ctx.fillStyle = 'rgba(214,184,120,0.5)';
+        ctx.beginPath();
+        ctx.arc(mx + Math.cos(a) * d, my + Math.sin(a) * d, mr * (0.09 + A.hash(i * 3.3) * 0.1), 0, Math.PI * 2);
+        ctx.fill();
     }
-    
-    // ── TWINKLING STARS ────────────────────────────────────
-    for (let i = 0; i < 100; i++) {
-        const sx = (Math.sin(i * 13.7) * 0.5 + 0.5) * W;
-        const sy = (Math.cos(i * 17.3) * 0.5 + 0.5) * H * 0.7;
-        const twinkle = 0.3 + Math.sin(t * 2 + i) * 0.4;
-        const starSize = 0.5 + Math.abs(Math.sin(t + i)) * 1.5;
-        
-        ctx.fillStyle = `rgba(255, 255, 220, ${twinkle})`;
-        ctx.beginPath(); ctx.arc(sx, sy, starSize, 0, Math.PI * 2); ctx.fill();
-        
-        // Glow on bright stars
-        if (twinkle > 0.5) {
-            ctx.fillStyle = `rgba(255, 255, 220, ${twinkle * 0.2})`;
-            ctx.beginPath(); ctx.arc(sx, sy, starSize * 3, 0, Math.PI * 2); ctx.fill();
+
+    // ── soft drifting cloud bands ───────────────────────────
+    for (let i = 0; i < 3; i++) {
+        const cx = ((t * (14 + i * 7) + i * 300) % (W + 320)) - 160;
+        const cy = H * (0.16 + i * 0.18);
+        const cs = 30 + i * 10;
+        ctx.fillStyle = 'rgba(150,162,222,0.22)';
+        for (const [ox, oy, os] of [[-1.1, 0.1, 0.7], [0, -0.25, 1], [1.05, 0.05, 0.8], [0.35, 0.22, 0.72]]) {
+            ctx.beginPath();
+            ctx.arc(cx + ox * cs, cy + oy * cs, cs * os, 0, Math.PI * 2);
+            ctx.fill();
         }
     }
-    
-    // ── CRESCENT MOON ──────────────────────────────────────
-    const moonX = W * 0.82, moonY = H * 0.2;
-    
-    // Moon glow
-    const moonGlow = ctx.createRadialGradient(moonX, moonY, 30, moonX, moonY, 80);
-    moonGlow.addColorStop(0, 'rgba(255, 255, 200, 0.15)');
-    moonGlow.addColorStop(0.5, 'rgba(255, 255, 200, 0.05)');
-    moonGlow.addColorStop(1, 'rgba(255, 255, 200, 0)');
-    ctx.fillStyle = moonGlow;
-    ctx.beginPath(); ctx.arc(moonX, moonY, 80, 0, Math.PI * 2); ctx.fill();
-    
-    // Moon body
-    ctx.fillStyle = '#FFEECC';
-    ctx.beginPath(); ctx.arc(moonX, moonY, 35, 0, Math.PI * 2); ctx.fill();
-    
-    // Crescent cutout
-    ctx.fillStyle = '#0a0a2e';
-    ctx.beginPath(); ctx.arc(moonX + 10, moonY - 3, 30, 0, Math.PI * 2); ctx.fill();
-    
-    // Moon surface craters
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
-    ctx.beginPath(); ctx.arc(moonX - 15, moonY - 10, 5, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(moonX - 5, moonY + 8, 3, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(moonX - 20, moonY + 5, 4, 0, Math.PI * 2); ctx.fill();
-    
-    // ── FIREFLIES NEAR GROUND ──────────────────────────────
-    for (let i = 0; i < 15; i++) {
-        const fx = (Math.sin(i * 3.5 + t * 0.15) * 0.5 + 0.5) * W;
-        const fy = H * 0.75 + (Math.cos(i * 4.2 + t * 0.2) * 0.5 + 0.5) * H * 0.2;
-        const pulse = Math.sin(t * 1.5 + i) * 0.4 + 0.6;
-        
-        ctx.fillStyle = `rgba(255, 255, 150, ${0.5 * pulse})`;
-        ctx.beginPath(); ctx.arc(fx, fy, 2 + pulse, 0, Math.PI * 2); ctx.fill();
-        
-        ctx.fillStyle = `rgba(255, 255, 200, ${0.2 * pulse})`;
-        ctx.beginPath(); ctx.arc(fx, fy, 6 + pulse * 3, 0, Math.PI * 2); ctx.fill();
+
+    // ── rolling hill silhouettes, two flat layers ───────────
+    ctx.fillStyle = '#1b2150';
+    ctx.beginPath();
+    ctx.moveTo(0, H);
+    ctx.lineTo(0, H * 0.84);
+    ctx.quadraticCurveTo(W * 0.3, H * 0.72, W * 0.6, H * 0.84);
+    ctx.quadraticCurveTo(W * 0.85, H * 0.92, W, H * 0.82);
+    ctx.lineTo(W, H);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = '#151a42';
+    ctx.beginPath();
+    ctx.moveTo(0, H);
+    ctx.lineTo(0, H * 0.92);
+    ctx.quadraticCurveTo(W * 0.4, H * 0.98, W * 0.7, H * 0.9);
+    ctx.quadraticCurveTo(W * 0.88, H * 0.86, W, H * 0.92);
+    ctx.lineTo(W, H);
+    ctx.closePath();
+    ctx.fill();
+
+    // ── a few wandering glow sparks ─────────────────────────
+    for (let i = 0; i < 5; i++) {
+        const fx = (A.hash(i * 12.7) * W + Math.sin(t * 0.8 + i * 2.4) * 30) % W;
+        const fy = H * 0.62 + A.hash(i * 15.1) * H * 0.26 + Math.cos(t * 0.6 + i) * 12;
+        const pulse = Math.max(0, Math.sin(t * 2 + i * 2.9));
+        if (pulse > 0.1) {
+            A.glow(ctx, fx, fy, 8 + pulse * 7, '#ffe9a0', pulse * 0.45);
+            ctx.fillStyle = `rgba(255,244,200,${pulse * 0.9})`;
+            ctx.beginPath(); ctx.arc(fx, fy, 1.4, 0, Math.PI * 2); ctx.fill();
+        }
     }
+
+    A.vig(ctx, W, H, 0.16);
 }

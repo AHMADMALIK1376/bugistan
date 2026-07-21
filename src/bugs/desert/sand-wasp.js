@@ -1,48 +1,49 @@
-// ── SAND WASP: Yellow-orange striped, fast wings ──────
+// ── SAND WASP: banded amber hunter, wings at full blur ──────
 class SandWasp {
     static draw(ctx, s, bob, bug) {
-        const size = s * 1.15;
-        // Fast translucent wings
-        ctx.fillStyle = 'rgba(200,200,220,0.35)';
-        ctx.beginPath(); ctx.ellipse(size*0.2, bob-size*0.4, size*0.5, size*0.2, -0.3, 0, Math.PI*2); ctx.fill();
-        ctx.beginPath(); ctx.ellipse(-size*0.2, bob-size*0.4, size*0.5, size*0.2, 0.3, 0, Math.PI*2); ctx.fill();
-        // Striped body
-        const segments = [
-            { y: 0.4, r: 0.22, c1: '#FFC107', c2: '#FF8F00' },
-            { y: 0.05, r: 0.2, c1: '#212121', c2: '#111' },
-            { y: -0.35, r: 0.25, c1: '#FFC107', c2: '#FF8F00' },
-        ];
-        for (let seg of segments) {
-            const segGrad = ctx.createRadialGradient(0, bob+seg.y*size, 0, 0, bob+seg.y*size, seg.r*size);
-            segGrad.addColorStop(0, seg.c1); segGrad.addColorStop(1, seg.c2);
-            ctx.fillStyle = segGrad;
-            ctx.beginPath(); ctx.arc(0, bob+seg.y*size, seg.r*size, 0, Math.PI*2); ctx.fill();
-        }
-        // Head
-        ctx.fillStyle = '#FFB300';
-        ctx.beginPath(); ctx.arc(0, bob-size*0.7, size*0.22, 0, Math.PI*2); ctx.fill();
-        // Eyes
+        const dark = '#6e4a14';
+        const band = '#ffb347';
+        const flap = Math.sin(bug.wingPhase * 1.4) * 0.5;
+        // fast translucent wings
         for (let side = -1; side <= 1; side += 2) {
-            ctx.fillStyle = '#FF4444';
-            ctx.beginPath(); ctx.arc(side*size*0.12, bob-size*0.75, size*0.06, 0, Math.PI*2); ctx.fill();
+            ctx.save(); ctx.scale(side, 1);
+            A.wing(ctx, s * 0.1, bob - s * 0.24, s * 1.15, s * 0.36, 0.55, flap * 0.45, '#d6cdb6', 0.26);
+            ctx.restore();
         }
-        // Antennae
-        ctx.strokeStyle = '#333'; ctx.lineWidth = 0.7;
-        for (let side = -1; side <= 1; side += 2) {
-            ctx.beginPath();
-            ctx.moveTo(side*size*0.06, bob-size*0.88);
-            ctx.lineTo(side*size*0.2, bob-size*1.2);
-            ctx.stroke();
-        }
-        // Legs
-        ctx.strokeStyle = '#333'; ctx.lineWidth = size * 0.06;
+        // legs trailing with digging combs on the front pair
         for (let side = -1; side <= 1; side += 2) {
             for (let i = 0; i < 3; i++) {
-                ctx.beginPath();
-                ctx.moveTo(side*size*0.1, bob-size*0.1+i*size*0.2);
-                ctx.lineTo(side*size*0.45, bob+size*0.2+i*size*0.1);
-                ctx.stroke();
+                const sw = Math.sin(bug.legPhase * 0.7 + i * 1.5) * s * 0.08;
+                A.leg(ctx, side * s * 0.12, bob - s * 0.08 + i * s * 0.14,
+                    side * s * (0.45 + i * 0.14) + sw, bob + s * (0.28 + i * 0.2) + sw,
+                    side * s * 0.22, s * 0.05, '#8a5c1c');
             }
         }
+        // banded abdomen: amber and umber hoops on a sleek spindle
+        for (let i = 4; i >= 0; i--) {
+            const sy = bob + s * 0.3 + i * s * 0.15;
+            const r = s * (0.24 - i * 0.035);
+            A.orb(ctx, 0, sy, r, r * 1.04, 0, i % 2 === 0 ? band : dark, { specA: 0.3 });
+        }
+        // pinched wasp waist
+        ctx.strokeStyle = dark;
+        ctx.lineCap = 'round';
+        ctx.lineWidth = s * 0.08;
+        ctx.beginPath(); ctx.moveTo(0, bob + s * 0.08); ctx.lineTo(0, bob + s * 0.24); ctx.stroke();
+        // thorax: dark, fuzzy-edged
+        A.orb(ctx, 0, bob - s * 0.1, s * 0.22, s * 0.26, 0, dark, { specA: 0.24 });
+        ctx.strokeStyle = 'rgba(120,95,55,0.4)';
+        ctx.lineWidth = 0.5;
+        for (let k = 0; k < 6; k++) {
+            const a = -Math.PI / 2 + (k - 2.5) * 0.4;
+            ctx.beginPath();
+            ctx.moveTo(Math.cos(a) * s * 0.16, bob - s * 0.1 + Math.sin(a) * s * 0.2);
+            ctx.lineTo(Math.cos(a) * s * 0.28, bob - s * 0.1 + Math.sin(a) * s * 0.3);
+            ctx.stroke();
+        }
+        // head with huge wraparound eyes — sand wasps hunt by sight
+        A.orb(ctx, 0, bob - s * 0.42, s * 0.17, s * 0.16, 0, '#e0a030', {});
+        A.face(ctx, 0, bob - s * 0.42, s * 0.46, bug.wobble);
+        A.antennae(ctx, s * 0.6, bob - s * 0.54, bug.antennaPhase, '#5c3e10', { len: 0.6 });
     }
 }

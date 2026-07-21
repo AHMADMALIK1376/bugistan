@@ -1,54 +1,43 @@
-// ── FIREFLY: Glowing abdomen, dark body, night flyer ──────
+// ── FIREFLY: charcoal beetle with a breathing lantern ──────
 class Firefly {
     static draw(ctx, s, bob, bug) {
-        const size = s * 1.0;
-        // Glow aura
-        const glowGrad = ctx.createRadialGradient(0, bob+size*0.3, 0, 0, bob+size*0.3, size*0.5);
-        glowGrad.addColorStop(0, 'rgba(255, 255, 150, 0.6)');
-        glowGrad.addColorStop(0.5, 'rgba(255, 255, 100, 0.2)');
-        glowGrad.addColorStop(1, 'rgba(255, 255, 50, 0)');
-        ctx.fillStyle = glowGrad;
-        ctx.beginPath(); ctx.arc(0, bob+size*0.3, size*0.5, 0, Math.PI*2); ctx.fill();
-        // Pulsing glow
-        const pulse = Math.sin(bug.wobble * 3) * 0.3 + 0.7;
-        const brightGlow = ctx.createRadialGradient(0, bob+size*0.3, 0, 0, bob+size*0.3, size*0.25);
-        brightGlow.addColorStop(0, `rgba(255, 255, 200, ${pulse})`);
-        brightGlow.addColorStop(1, 'rgba(255, 255, 100, 0)');
-        ctx.fillStyle = brightGlow;
-        ctx.beginPath(); ctx.arc(0, bob+size*0.3, size*0.25, 0, Math.PI*2); ctx.fill();
-        // Dark body
-        ctx.fillStyle = '#1A1A1A';
-        ctx.beginPath(); ctx.ellipse(0, bob-size*0.05, size*0.15, size*0.3, 0, 0, Math.PI*2); ctx.fill();
-        // Thorax
-        ctx.fillStyle = '#2A2A2A';
-        ctx.beginPath(); ctx.arc(0, bob-size*0.3, size*0.12, 0, Math.PI*2); ctx.fill();
-        // Head
-        ctx.fillStyle = '#111';
-        ctx.beginPath(); ctx.arc(0, bob-size*0.42, size*0.1, 0, Math.PI*2); ctx.fill();
-        // Glowing abdomen
-        ctx.fillStyle = `rgba(255, 255, 100, ${0.7 + Math.sin(bug.wobble*3)*0.3})`;
-        ctx.beginPath(); ctx.arc(0, bob+size*0.3, size*0.15, 0, Math.PI*2); ctx.fill();
-        // Wings
-        ctx.fillStyle = 'rgba(200,200,200,0.3)';
-        ctx.beginPath(); ctx.ellipse(size*0.2, bob-size*0.25, size*0.4, size*0.15, -0.2, 0, Math.PI*2); ctx.fill();
-        ctx.beginPath(); ctx.ellipse(-size*0.2, bob-size*0.25, size*0.4, size*0.15, 0.2, 0, Math.PI*2); ctx.fill();
-        // Antennae
-        ctx.strokeStyle = '#333'; ctx.lineWidth = 0.5;
+        const body = '#4a5ac8';
+        // the lantern: slow pulse, warm bioluminescent green
+        const pulse = Math.max(0, Math.sin(bug.wobble * 1.6)) ** 2;
+        A.glow(ctx, 0, bob + s * 0.55, s * (1.3 + pulse * 1.4), '#ffd166', 0.16 + pulse * 0.3);
+        // wings slightly lifted mid-flight
+        const flap = Math.sin(bug.wingPhase) * 0.4;
         for (let side = -1; side <= 1; side += 2) {
+            ctx.save(); ctx.scale(side, 1);
+            A.wing(ctx, s * 0.1, bob - s * 0.15, s * 0.85, s * 0.3, 0.8, flap * 0.4, '#9aa4b8', 0.22);
+            ctx.restore();
+        }
+        // legs tucked
+        for (let side = -1; side <= 1; side += 2) {
+            const sw = Math.sin(bug.legPhase + (side > 0 ? Math.PI : 0)) * s * 0.06;
+            A.leg(ctx, side * s * 0.14, bob, side * s * 0.36 + sw, bob + s * 0.24 + sw, side * s * 0.12, s * 0.04, '#3c4cb2');
+        }
+        // abdomen: dark shell ending in the light organ
+        A.orb(ctx, 0, bob + s * 0.22, s * 0.26, s * 0.4, 0, body, { specA: 0.25 });
+        // lantern segments proper: two glowing plates
+        for (let k = 0; k < 2; k++) {
+            const ly = bob + s * (0.48 + k * 0.15);
+            const lg = ctx.createRadialGradient(0, ly, 0, 0, ly, s * 0.2);
+            lg.addColorStop(0, `rgba(255,232,150,${0.5 + pulse * 0.5})`);
+            lg.addColorStop(0.7, `rgba(255,196,90,${0.3 + pulse * 0.4})`);
+            lg.addColorStop(1, 'rgba(235,160,60,0.1)');
+            ctx.fillStyle = lg;
             ctx.beginPath();
-            ctx.moveTo(side*size*0.04, bob-size*0.5);
-            ctx.lineTo(side*size*0.15, bob-size*0.65);
-            ctx.stroke();
+            ctx.ellipse(0, ly, s * (0.2 - k * 0.05), s * 0.09, 0, 0, Math.PI * 2);
+            ctx.fill();
         }
-        // Legs
-        ctx.strokeStyle = '#333'; ctx.lineWidth = size * 0.04;
-        for (let side = -1; side <= 1; side += 2) {
-            for (let i = 0; i < 3; i++) {
-                ctx.beginPath();
-                ctx.moveTo(side*size*0.06, bob-size*0.1+i*size*0.12);
-                ctx.lineTo(side*size*0.25, bob+size*0.1+i*size*0.08);
-                ctx.stroke();
-            }
-        }
+        // pronotum hood: the half-shield that covers a firefly's head
+        A.orb(ctx, 0, bob - s * 0.2, s * 0.26, s * 0.2, 0, '#e06858', { specA: 0.3 });
+        ctx.fillStyle = 'rgba(190,90,80,0.35)';
+        ctx.beginPath(); ctx.ellipse(0, bob - s * 0.24, s * 0.14, s * 0.08, 0, 0, Math.PI * 2); ctx.fill();
+        // head peeking from under the hood
+        A.orb(ctx, 0, bob - s * 0.4, s * 0.12, s * 0.1, 0, '#4252bc', {});
+        A.face(ctx, 0, bob - s * 0.22, s * 0.5, bug.wobble);
+        A.antennae(ctx, s * 0.6, bob - s * 0.48, bug.antennaPhase, '#2c3782', { len: 0.6 });
     }
 }
