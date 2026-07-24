@@ -70,6 +70,6 @@ class Turtle {
         ctx.beginPath(); ctx.ellipse(0, bob, s * 0.58, s * 0.68, 0, 0, Math.PI * 2); ctx.fill();
         // head: scaled wedge with a gentle beak, no cartoon smile
         A.orb(ctx, 0, bob - s * 0.82, s * 0.19, s * 0.23, 0, '#3cae50', { specA: 0.26 });
-        A.face(ctx, 0, bob - s * 0.84, s * 0.36, bug.wobble);
+        A.eyes(ctx, 0, bob - s * 0.84, s * 0.36 * 0.26, s * 0.36 * 0.135, '#1c1712');
     }
 }

@@ -72,7 +72,7 @@ class Seahorse {
         ctx.lineTo(s * 0.08, -s * 0.16);
         ctx.closePath();
         ctx.fill();
-        A.face(ctx, 0, 0, s * 0.3, bug.wobble);
+        A.eyes(ctx, 0, 0, s * 0.3 * 0.26, s * 0.3 * 0.135, '#1c1712');
         ctx.restore();
         ctx.restore();
     }

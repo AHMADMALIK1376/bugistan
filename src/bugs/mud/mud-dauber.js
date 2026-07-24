@@ -32,7 +32,7 @@ class MudDauber {
         // thorax and head
         A.orb(ctx, 0, bob - s * 0.12, s * 0.24, s * 0.28, 0, body, { specA: 0.35 });
         A.orb(ctx, 0, bob - s * 0.52, s * 0.18, s * 0.18, 0, '#7a8ce8', {});
-        A.face(ctx, 0, bob - s * 0.52, s * 0.5, bug.wobble);
+        A.eyes(ctx, 0, bob - s * 0.52, s * 0.5 * 0.26, s * 0.5 * 0.135, '#1c1712');
         A.antennae(ctx, s * 0.8, bob - s * 0.62, bug.antennaPhase, '#3a4a9e', { len: 0.8 });
     }
 }

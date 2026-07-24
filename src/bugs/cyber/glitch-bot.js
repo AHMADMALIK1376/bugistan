@@ -58,7 +58,7 @@ class GlitchBot {
         ctx.beginPath();
         ctx.ellipse(-s * 0.18, bob - s * 0.56, s * 0.1, s * 0.05, -0.3, 0, Math.PI * 2);
         ctx.fill();
-        A.face(ctx, 0, bob - s * 0.42, s * 0.48, bug.wobble);
+        A.eyes(ctx, 0, bob - s * 0.42, s * 0.48 * 0.26, s * 0.48 * 0.135, '#1c1712');
         ctx.restore();
         // antenna with blinking tip
         ctx.strokeStyle = '#1e8a8a';

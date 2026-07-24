@@ -44,7 +44,7 @@ class Spider {
         // cephalothorax
         A.orb(ctx, 0, bob - s * 0.14, s * 0.26, s * 0.24, 0, '#b57ef0', { specA: 0.28 });
         // eye cluster: two large, arc of small — genuinely spider
-        A.face(ctx, 0, bob - s * 0.16, s * 0.52, bug.wobble);
+        A.eyes(ctx, 0, bob - s * 0.16, s * 0.52 * 0.26, s * 0.52 * 0.135, '#1c1712');
         ctx.fillStyle = '#4a2880';
         for (let k = 0; k < 4; k++) {
             const ex = (k - 1.5) * s * 0.09;

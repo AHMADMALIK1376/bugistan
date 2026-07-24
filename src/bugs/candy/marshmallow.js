@@ -34,7 +34,7 @@ class Marshmallow {
         ctx.beginPath();
         ctx.ellipse(-s * 0.16, -s * 0.22, s * 0.14, s * 0.07, -0.3, 0, Math.PI * 2);
         ctx.fill();
-        A.face(ctx, 0, -s * 0.02, s * 0.46, bug.wobble);
+        A.eyes(ctx, 0, -s * 0.02, s * 0.46 * 0.26, s * 0.46 * 0.135, '#1c1712');
         ctx.restore();
     }
 }

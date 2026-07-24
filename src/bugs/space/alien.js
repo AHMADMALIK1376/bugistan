@@ -52,7 +52,7 @@ class Alien {
         ctx.bezierCurveTo(s * 0.46, -s * 0.4, s * 0.4, s * 0.28, 0, s * 0.42);
         ctx.fill();
         // the crying face on the big cranium
-        A.face(ctx, 0, s * 0.02, s * 0.55, bug.wobble);
+        A.eyes(ctx, 0, s * 0.02, s * 0.55 * 0.26, s * 0.55 * 0.135, '#1c1712');
         ctx.restore();
     }
 }

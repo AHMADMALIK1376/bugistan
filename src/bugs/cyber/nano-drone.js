@@ -34,6 +34,6 @@ class NanoDrone {
         ctx.beginPath(); ctx.arc(0, y + s * 0.32, s * 0.055, 0, Math.PI * 2); ctx.fill();
         A.glow(ctx, 0, y + s * 0.32, s * 0.16, '#3ce0e0', pulse * 0.4);
         // the crying face on the pod
-        A.face(ctx, 0, y - s * 0.08, s * 0.52, bug.wobble);
+        A.eyes(ctx, 0, y - s * 0.08, s * 0.52 * 0.26, s * 0.52 * 0.135, '#1c1712');
     }
 }

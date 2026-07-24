@@ -44,7 +44,7 @@ class DesertLocust {
         ctx.beginPath(); ctx.moveTo(0, bob - s * 0.4); ctx.lineTo(0, bob + s * 0.04); ctx.stroke();
         // big blunt head with striped eyes
         A.orb(ctx, 0, bob - s * 0.5, s * 0.19, s * 0.21, 0, '#fccc70', { specA: 0.24 });
-        A.face(ctx, 0, bob - s * 0.5, s * 0.52, bug.wobble);
+        A.eyes(ctx, 0, bob - s * 0.5, s * 0.52 * 0.26, s * 0.52 * 0.135, '#1c1712');
         A.antennae(ctx, s * 0.7, bob - s * 0.62, bug.antennaPhase, '#8a611a', { len: 0.7 });
     }
 }

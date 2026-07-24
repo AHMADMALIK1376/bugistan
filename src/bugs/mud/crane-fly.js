@@ -42,7 +42,7 @@ class CraneFly {
         // slight thorax hump and tiny head with snout
         A.orb(ctx, 0, bob - s * 0.14, s * 0.15, s * 0.18, 0, '#caa05e', { specA: 0.24 });
         A.orb(ctx, 0, bob - s * 0.38, s * 0.09, s * 0.11, 0, '#b8884a', {});
-        A.face(ctx, 0, bob - s * 0.38, s * 0.36, bug.wobble);
+        A.eyes(ctx, 0, bob - s * 0.38, s * 0.36 * 0.26, s * 0.36 * 0.135, '#1c1712');
         A.antennae(ctx, s * 0.6, bob - s * 0.46, bug.antennaPhase, '#8a6a40', { len: 0.6 });
     }
 }

@@ -26,7 +26,7 @@ class Mayfly {
         // thorax and small head
         A.orb(ctx, 0, bob - s * 0.18, s * 0.17, s * 0.22, 0, '#8cc940', { specA: 0.28 });
         A.orb(ctx, 0, bob - s * 0.46, s * 0.12, s * 0.12, 0, '#7cb636', {});
-        A.face(ctx, 0, bob - s * 0.46, s * 0.42, bug.wobble);
+        A.eyes(ctx, 0, bob - s * 0.46, s * 0.42 * 0.26, s * 0.42 * 0.135, '#1c1712');
         // dainty legs held forward
         for (let side = -1; side <= 1; side += 2) {
             A.leg(ctx, side * s * 0.1, bob - s * 0.14, side * s * 0.42, bob - s * 0.44, side * s * 0.16, s * 0.04, A.tone(body, -0.3));

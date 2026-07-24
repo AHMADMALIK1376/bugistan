@@ -41,6 +41,6 @@ class CandyCorn {
             ctx.beginPath(); ctx.arc(gx, gy, s * 0.025, 0, Math.PI * 2); ctx.fill();
         }
         // the crying face on the orange band
-        A.face(ctx, 0, y + s * 0.02, s * 0.42, bug.wobble);
+        A.eyes(ctx, 0, y + s * 0.02, s * 0.42 * 0.26, s * 0.42 * 0.135, '#1c1712');
     }
 }

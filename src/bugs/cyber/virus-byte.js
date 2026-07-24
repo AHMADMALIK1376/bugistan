@@ -33,6 +33,6 @@ class VirusByte {
             ctx.fill();
         }
         // the crying face
-        A.face(ctx, 0, bob - s * 0.06, s * 0.52, bug.wobble);
+        A.eyes(ctx, 0, bob - s * 0.06, s * 0.52 * 0.26, s * 0.52 * 0.135, '#1c1712');
     }
 }

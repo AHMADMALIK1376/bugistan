@@ -60,7 +60,7 @@ class Donut {
             ctx.beginPath(); ctx.arc(gx, gy, s * 0.022, 0, Math.PI * 2); ctx.fill();
         }
         // the crying face on the icing
-        A.face(ctx, 0, bob - s * 0.22, s * 0.5, bug.wobble);
+        A.eyes(ctx, 0, bob - s * 0.22, s * 0.5 * 0.26, s * 0.5 * 0.135, '#1c1712');
         ctx.restore();
     }
 }

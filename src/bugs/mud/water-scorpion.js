@@ -49,6 +49,6 @@ class WaterScorpion {
         }
         // narrow head, beady eyes
         A.orb(ctx, 0, bob - s * 0.5, s * 0.13, s * 0.12, 0, '#d0682c', {});
-        A.face(ctx, 0, bob - s * 0.48, s * 0.44, bug.wobble);
+        A.eyes(ctx, 0, bob - s * 0.48, s * 0.44 * 0.26, s * 0.44 * 0.135, '#1c1712');
     }
 }

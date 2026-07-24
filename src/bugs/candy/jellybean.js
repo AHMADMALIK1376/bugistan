@@ -31,7 +31,7 @@ class JellyBean {
         ctx.beginPath();
         ctx.ellipse(-s * 0.14, -s * 0.18, s * 0.08, s * 0.26, -0.2, 0, Math.PI * 2);
         ctx.fill();
-        A.face(ctx, 0, -s * 0.02, s * 0.4, bug.wobble);
+        A.eyes(ctx, 0, -s * 0.02, s * 0.4 * 0.26, s * 0.4 * 0.135, '#1c1712');
         ctx.restore();
     }
 }

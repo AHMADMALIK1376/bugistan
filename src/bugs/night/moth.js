@@ -73,7 +73,7 @@ class Moth {
         }
         // head with big dark night eyes
         A.orb(ctx, 0, bob - s * 0.42, s * 0.14, s * 0.13, 0, '#c0a0e8', {});
-        A.face(ctx, 0, bob - s * 0.4, s * 0.42, bug.wobble);
+        A.eyes(ctx, 0, bob - s * 0.4, s * 0.42 * 0.26, s * 0.42 * 0.135, '#1c1712');
         // feathered plume antennae
         for (let side = -1; side <= 1; side += 2) {
             const tip = Math.sin(bug.antennaPhase + side) * s * 0.06;

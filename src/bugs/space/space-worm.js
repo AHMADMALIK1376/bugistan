@@ -59,7 +59,7 @@ class SpaceWorm {
         ctx.arc(hd.x, hd.y + s * 0.02, s * 0.26, Math.PI * 1.25, Math.PI * 1.75);
         ctx.stroke();
         // the crying face on the prow
-        A.face(ctx, hd.x, hd.y - s * 0.05, s * 0.5, bug.wobble);
+        A.eyes(ctx, hd.x, hd.y - s * 0.05, s * 0.5 * 0.26, s * 0.5 * 0.135, '#1c1712');
         // the lure: a glowing antenna orb bobbing ahead
         const lureX = hd.x + Math.sin(bug.antennaPhase) * s * 0.1;
         const lureY = hd.y - s * 0.6;

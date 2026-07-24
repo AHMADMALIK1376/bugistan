@@ -76,6 +76,6 @@ class Crab {
             ctx.restore();
         }
         // the crying face on the carapace
-        A.face(ctx, 0, bob - s * 0.08, s * 0.55, bug.wobble);
+        A.eyes(ctx, 0, bob - s * 0.08, s * 0.55 * 0.26, s * 0.55 * 0.135, '#1c1712');
     }
 }

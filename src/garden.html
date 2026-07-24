@@ -220,6 +220,7 @@ let errorTarget = 0, warningTarget = 0;
 let combo = 0, comboTimer = 0, particles = [];
 let currentBackground = 'mud';
 let speedMult = 1, maxBugs = 5;
+const FLEE_R = 95; // how close the slipper must get before a bug panics
 
 // Total bugs on screen, capped by the bugistan.maxBugs setting
 function totalTarget() { return Math.min(errorTarget + warningTarget, maxBugs); }
@@ -246,14 +247,18 @@ class Bug {
         this.bug = bugTypes[this.type];
         this.isWarning = isWarning || false;
         this.canFly = this.bug.canFly !== undefined ? this.bug.canFly : true;
-        this.speed = this.bug.speed * speedMult;
+        this.baseSpeed = this.bug.speed * speedMult;
+        this.fleeSpeed = this.baseSpeed * 7;
+        this.speed = this.baseSpeed;
+        this.tspeed = this.baseSpeed;
         this.x = 30 + Math.random() * (W - 60);
         this.y = 30 + Math.random() * (H - 60);
-        this.vx = (Math.random() - 0.5) * this.speed;
-        this.vy = (Math.random() - 0.5) * this.speed;
-        this.targetVx = this.vx;
-        this.targetVy = this.vy;
-        this.angle = Math.atan2(this.vy, this.vx);
+        this.dir = Math.random() * Math.PI * 2;
+        this.tdir = this.dir;
+        this.vx = Math.cos(this.dir) * this.speed;
+        this.vy = Math.sin(this.dir) * this.speed;
+        this.angle = this.dir + Math.PI / 2;
+        this.hit = 0;
 
         const errorScale = Math.min(2.1, 1.35 + (errorTarget * 0.05));
         const warningScale = Math.min(1.7, 1.05 + (warningTarget * 0.04));
@@ -274,20 +279,36 @@ class Bug {
         if (!this.alive) return;
         const dx = mouse.x - this.x, dy = mouse.y - this.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        const fleeing = dist < 90;
+        const scare = FLEE_R + this.size;
+        const fleeing = dist < scare;
         if (fleeing) {
+            // PANIC: wheel around to run straight away from the slipper,
+            // and ramp speed up the closer it gets — legs speed up with it
             this.fleeTimer = 25;
-            this.vx -= (dx / dist) * 0.6; this.vy -= (dy / dist) * 0.6;
-            this.targetVx = this.vx; this.targetVy = this.vy;
+            this.tdir = Math.atan2(-dy, -dx);
+            let dd = this.tdir - this.dir;
+            dd = ((dd + Math.PI) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2) - Math.PI;
+            this.dir += dd * 0.25;
+            const closeness = 1 - dist / scare;
+            this.tspeed = this.baseSpeed + (this.fleeSpeed - this.baseSpeed) * Math.min(1, 0.35 + closeness);
         } else {
-            // ease toward the wandering target velocity instead of snapping to it
-            this.vx += (this.targetVx - this.vx) * 0.05;
-            this.vy += (this.targetVy - this.vy) * 0.05;
+            if (this.fleeTimer > 0) this.fleeTimer--;
+            // CALM: slow wander — gentle drift plus occasional sharp turns
+            // and about-faces, so it roams in every direction over time
+            this.tdir += (Math.random() - 0.5) * 0.06;
+            if (Math.random() < 0.010) this.tdir += (Math.random() - 0.5) * 1.6;
+            if (Math.random() < 0.004) this.tdir += Math.PI * (0.7 + Math.random() * 0.6);
+            let dd = this.tdir - this.dir;
+            dd = ((dd + Math.PI) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2) - Math.PI;
+            this.dir += dd * 0.06;
+            this.tspeed = this.baseSpeed;
         }
-        if (this.fleeTimer > 0) this.fleeTimer--;
+        this.speed += (this.tspeed - this.speed) * 0.28;
+        this.vx = Math.cos(this.dir) * this.speed;
+        this.vy = Math.sin(this.dir) * this.speed;
 
         this.x += this.vx;
-        
+
         // Ocean creatures: swim horizontally with gentle bobbing
         if (currentBackground === 'ocean') {
             this.y += Math.sin(this.wobble) * 0.4;
@@ -295,28 +316,23 @@ class Bug {
         } else {
             this.y += this.vy;
         }
-        
-        this.wobble += 0.06; this.legPhase += 0.28 * this.speed;
+
+        this.wobble += 0.06; this.legPhase += 0.55 * this.speed;
         this.antennaPhase += 0.12; this.wingPhase += 0.35;
-        const spd = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
-        if (spd > this.speed * 2.5) { this.vx *= 0.88; this.vy *= 0.88; this.targetVx = this.vx; this.targetVy = this.vy; }
-        if (this.x < 12 || this.x > W - 12) { this.vx *= -1; this.targetVx = this.vx; }
+        if (this.hit > 0) this.hit--;
+        if (this.x < 12 || this.x > W - 12) { this.dir = this.tdir = Math.PI - this.dir; }
         this.x = Math.max(12, Math.min(W - 12, this.x));
 
         if (currentBackground === 'ocean') {
             this.y = Math.max(H * 0.15, Math.min(H * 0.85, this.y));
         } else {
-            if (this.y < 12 || this.y > H - 12) { this.vy *= -1; this.targetVy = this.vy; }
+            if (this.y < 12 || this.y > H - 12) { this.dir = this.tdir = -this.dir; }
             this.y = Math.max(12, Math.min(H - 12, this.y));
         }
 
-        if (Math.random() < 0.006 && !fleeing) {
-            this.targetVx = (Math.random() - 0.5) * this.speed;
-            if (currentBackground !== 'ocean') this.targetVy = (Math.random() - 0.5) * this.speed;
-        }
         // ease the facing angle toward the current heading (shortest-arc), so
         // turns read as a smooth swing instead of an instant snap
-        const heading = Math.atan2(this.vy, this.vx);
+        const heading = this.dir + Math.PI / 2;
         let da = heading - this.angle;
         da = ((da + Math.PI) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2) - Math.PI;
         this.angle += da * 0.15;
@@ -343,7 +359,15 @@ class Bug {
         ctx.fillStyle = ag;
         ctx.beginPath(); ctx.arc(0, 0, s * 1.5, 0, Math.PI * 2); ctx.fill();
         ctx.restore();
+        // subtle walking sway/rock in step with the legs, plus a brief
+        // squash when this bug just bumped into another one
+        ctx.save();
+        ctx.translate(Math.sin(this.legPhase) * s * 0.03, 0);
+        ctx.rotate(Math.sin(this.legPhase) * 0.025);
+        const squash = 1 + (this.hit / 10) * 0.08;
+        ctx.scale(1 / squash, squash);
         if (this.bug.draw) { this.bug.draw(ctx, s, bob, this); }
+        ctx.restore();
         if (fleeing) {
             const fa = this.fleeTimer / 25;
             ctx.strokeStyle = `rgba(255,245,220,${0.45 * fa})`;
@@ -364,6 +388,26 @@ class Bug {
     contains(px, py) { return Math.abs(px - this.x) < this.size * 1.5 && Math.abs(py - this.y) < this.size * 1.5; }
 }
 
+// bugs bump off each other: separate, then each walks away the opposite way
+function resolveCollisions(list) {
+    for (let i = 0; i < list.length; i++) {
+        for (let j = i + 1; j < list.length; j++) {
+            const a = list[i], b = list[j];
+            if (!a.alive || !b.alive) continue;
+            const dx = b.x - a.x, dy = b.y - a.y, dist = Math.sqrt(dx * dx + dy * dy);
+            const minD = (a.size + b.size) * 1.05;
+            if (dist < minD && dist > 0.001) {
+                const nx = dx / dist, ny = dy / dist, overlap = minD - dist;
+                a.x -= nx * overlap * 0.5; a.y -= ny * overlap * 0.5;
+                b.x += nx * overlap * 0.5; b.y += ny * overlap * 0.5;
+                a.dir = a.tdir = Math.atan2(-ny, -nx);
+                b.dir = b.tdir = Math.atan2(ny, nx);
+                a.hit = b.hit = 10;
+            }
+        }
+    }
+}
+
 function drawEnv() {
     switch (currentBackground) {
         case 'mud': drawMudBackground(); break;
@@ -382,7 +426,7 @@ function updateParticles(){for(let p of particles){p.x+=p.vx;p.y+=p.vy;if(!p.isS
 function drawParticles(){for(let p of particles){ctx.save();ctx.globalAlpha=p.life;ctx.fillStyle=p.color;if(p.isSplat){ctx.beginPath();ctx.ellipse(p.x,p.y,p.size*2,p.size*.5,0,0,Math.PI*2);ctx.fill()}else{ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);ctx.fill()}ctx.restore()}}
 function updateCountDisplay(){errCountEl.textContent=errorTarget;warnCountEl.textContent=warningTarget}
 function setTargets(errors,warnings){errorTarget=errors;warningTarget=warnings;const tot=totalTarget();bugs=bugs.filter(b=>b.alive);while(bugs.length>tot){const b=bugs.pop();if(b)b.alive=false}while(bugs.length<tot)bugs.push(new Bug(undefined,bugs.length>=errors));updateCountDisplay()}
-function gameLoop(){frame++;if(comboTimer>0){comboTimer--;if(!comboTimer){combo=0;comboEl.textContent='0'}}updateParticles();ctx.clearRect(0,0,W,H);drawEnv();for(let b of bugs){b.update();b.draw(ctx)}drawParticles();requestAnimationFrame(gameLoop)}
+function gameLoop(){frame++;if(comboTimer>0){comboTimer--;if(!comboTimer){combo=0;comboEl.textContent='0'}}updateParticles();ctx.clearRect(0,0,W,H);drawEnv();for(let b of bugs){b.update()}resolveCollisions(bugs);for(let b of bugs){b.draw(ctx)}drawParticles();requestAnimationFrame(gameLoop)}
 canvas.addEventListener('click',e=>{const r=canvas.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;for(let i=bugs.length-1;i>=0;i--){if(bugs[i].alive&&bugs[i].contains(mx,my)){bugs[i].squish();break}}});
 window.addEventListener('message',e=>{
     if(e.data.command==='setTargets')setTargets(e.data.errors,e.data.warnings);

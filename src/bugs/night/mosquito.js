@@ -42,7 +42,7 @@ class Mosquito {
         A.orb(ctx, 0, bob - s * 0.12, s * 0.16, s * 0.2, -0.1, '#a6b0ea', { specA: 0.26 });
         // small head tucked low
         A.orb(ctx, 0, bob - s * 0.36, s * 0.1, s * 0.09, 0, '#7a86d0', {});
-        A.face(ctx, 0, bob - s * 0.35, s * 0.32, bug.wobble);
+        A.eyes(ctx, 0, bob - s * 0.35, s * 0.32 * 0.26, s * 0.32 * 0.135, '#1c1712');
         // the needle: long proboscis with a hair-thin highlight
         ctx.strokeStyle = '#3e4880';
         ctx.lineWidth = s * 0.04;

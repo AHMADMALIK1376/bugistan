@@ -73,6 +73,6 @@ class Jellyfish {
         ctx.arc(-bw * 0.25, bob - bh * 0.45, bw * 0.5, Math.PI * 1.1, Math.PI * 1.6);
         ctx.stroke();
         // the crying face on the bell
-        A.face(ctx, 0, bob - bh * 0.3, bw * 0.8, bug.wobble);
+        A.eyes(ctx, 0, bob - bh * 0.3, bw * 0.8 * 0.26, bw * 0.8 * 0.135, '#1c1712');
     }
 }

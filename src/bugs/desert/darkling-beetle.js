@@ -31,7 +31,7 @@ class DarklingBeetle {
         A.orb(ctx, 0, bob - s * 0.44, s * 0.3, s * 0.18, 0, '#6a4cb0', { specA: 0.12 });
         // head angled down in the classic butt-up posture
         A.orb(ctx, 0, bob - s * 0.62, s * 0.16, s * 0.12, 0, '#8a6ccc', {});
-        A.face(ctx, 0, bob - s * 0.6, s * 0.44, bug.wobble);
+        A.eyes(ctx, 0, bob - s * 0.6, s * 0.44 * 0.26, s * 0.44 * 0.135, '#1c1712');
         A.antennae(ctx, s * 0.6, bob - s * 0.68, bug.antennaPhase, '#3e2a6a', { len: 0.6, club: true });
     }
 }

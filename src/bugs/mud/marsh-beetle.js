@@ -49,7 +49,7 @@ class MarshBeetle {
         ctx.beginPath(); ctx.ellipse(-s * 0.08, bob + s * 0.42, s * 0.26, s * 0.18, 0.3, 0, Math.PI * 2); ctx.fill();
         // head tucked into the shell
         A.orb(ctx, 0, bob - s * 0.52, s * 0.2, s * 0.16, 0, '#2ba656', {});
-        A.face(ctx, 0, bob - s * 0.5, s * 0.5, bug.wobble);
+        A.eyes(ctx, 0, bob - s * 0.5, s * 0.5 * 0.26, s * 0.5 * 0.135, '#1c1712');
         A.antennae(ctx, s * 0.55, bob - s * 0.6, bug.antennaPhase, '#237a42', { len: 0.55, club: true });
     }
 }

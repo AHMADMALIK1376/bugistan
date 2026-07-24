@@ -34,7 +34,7 @@ class NamibBeetle {
         ctx.restore();
         // small down-tilted head
         A.orb(ctx, 0, bob - s * 0.56, s * 0.16, s * 0.13, 0, '#c89650', {});
-        A.face(ctx, 0, bob - s * 0.54, s * 0.44, bug.wobble);
+        A.eyes(ctx, 0, bob - s * 0.54, s * 0.44 * 0.26, s * 0.44 * 0.135, '#1c1712');
         A.antennae(ctx, s * 0.55, bob - s * 0.64, bug.antennaPhase, '#7a5c2c', { len: 0.55, club: true });
     }
 }

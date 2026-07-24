@@ -56,7 +56,7 @@ class RobotBug {
         A.glow(ctx, 0, bob + s * 0.06, s * 0.4, '#57c8e8', corePulse * 0.18);
         // head unit with the crying face
         A.orb(ctx, 0, bob - s * 0.52, s * 0.24, s * 0.19, 0, '#b8c8d8', { specA: 0.5 });
-        A.face(ctx, 0, bob - s * 0.52, s * 0.44, bug.wobble);
+        A.eyes(ctx, 0, bob - s * 0.52, s * 0.44 * 0.26, s * 0.44 * 0.135, '#1c1712');
         // antenna mast with a blinking tip
         ctx.strokeStyle = '#62788e';
         ctx.lineWidth = s * 0.025;

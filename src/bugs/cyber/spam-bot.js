@@ -42,7 +42,7 @@ class SpamBot {
             ctx.fillRect(-s * 0.38, sy, s * 0.76, s * 0.04);
         }
         // the crying face broadcast on screen
-        A.face(ctx, 0, bob - s * 0.28, s * 0.5, bug.wobble);
+        A.eyes(ctx, 0, bob - s * 0.28, s * 0.5 * 0.26, s * 0.5 * 0.135, '#1c1712');
         ctx.restore();
         // screen gloss
         ctx.fillStyle = 'rgba(255,255,255,0.3)';

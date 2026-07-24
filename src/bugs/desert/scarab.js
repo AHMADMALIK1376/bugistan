@@ -47,6 +47,6 @@ class Scarab {
         ctx.closePath();
         ctx.fill();
         ctx.restore();
-        A.face(ctx, 0, bob - s * 0.48, s * 0.56, bug.wobble);
+        A.eyes(ctx, 0, bob - s * 0.48, s * 0.56 * 0.26, s * 0.56 * 0.135, '#1c1712');
     }
 }

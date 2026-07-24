@@ -56,7 +56,7 @@ class Stonefly {
         A.orb(ctx, 0, bob - s * 0.1, s * 0.2, s * 0.24, 0, '#4c98c8', { specA: 0.22 });
         // wide flat head, eyes at the corners
         A.orb(ctx, 0, bob - s * 0.42, s * 0.18, s * 0.13, 0, '#4290c0', {});
-        A.face(ctx, 0, bob - s * 0.4, s * 0.42, bug.wobble);
+        A.eyes(ctx, 0, bob - s * 0.4, s * 0.42 * 0.26, s * 0.42 * 0.135, '#1c1712');
         // very long threadlike antennae
         A.antennae(ctx, s * 1.05, bob - s * 0.5, bug.antennaPhase, '#2c5e82', { len: 1.05 });
     }

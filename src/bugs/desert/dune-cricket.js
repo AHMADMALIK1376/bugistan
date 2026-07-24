@@ -43,7 +43,7 @@ class DuneCricket {
         }
         // round head with large night-adapted eyes
         A.orb(ctx, 0, bob - s * 0.46, s * 0.17, s * 0.17, 0, '#f8e09a', { specA: 0.24 });
-        A.face(ctx, 0, bob - s * 0.46, s * 0.48, bug.wobble);
+        A.eyes(ctx, 0, bob - s * 0.46, s * 0.48 * 0.26, s * 0.48 * 0.135, '#1c1712');
         // sweeping antennae, longer than the body
         A.antennae(ctx, s * 1.2, bob - s * 0.58, bug.antennaPhase, '#7c6830', { len: 1.2 });
     }

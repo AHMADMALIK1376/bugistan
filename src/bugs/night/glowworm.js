@@ -46,7 +46,7 @@ class Glowworm {
         }
         // small hardened head
         A.orb(ctx, 0, bob - s * 0.6, s * 0.12, s * 0.11, 0, '#2eb890', {});
-        A.face(ctx, 0, bob - s * 0.58, s * 0.36, bug.wobble);
+        A.eyes(ctx, 0, bob - s * 0.58, s * 0.36 * 0.26, s * 0.36 * 0.135, '#1c1712');
         A.antennae(ctx, s * 0.4, bob - s * 0.66, bug.antennaPhase, '#248064', { len: 0.4 });
     }
 }

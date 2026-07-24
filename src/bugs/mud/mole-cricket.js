@@ -43,7 +43,7 @@ class MoleCricket {
         }
         // head: small, mostly buried under the pronotum
         A.orb(ctx, 0, bob - s * 0.48, s * 0.18, s * 0.16, 0, '#d09250', {});
-        A.face(ctx, 0, bob - s * 0.48, s * 0.5, bug.wobble);
+        A.eyes(ctx, 0, bob - s * 0.48, s * 0.5 * 0.26, s * 0.5 * 0.135, '#1c1712');
         A.antennae(ctx, s * 0.7, bob - s * 0.56, bug.antennaPhase, '#7e5527', { len: 0.7 });
     }
 }

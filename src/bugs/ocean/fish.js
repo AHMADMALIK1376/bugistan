@@ -75,6 +75,6 @@ class Fish {
         ctx.beginPath();
         ctx.arc(0, bob - s * 0.3, s * 0.26, Math.PI * 0.25, Math.PI * 0.75);
         ctx.stroke();
-        A.face(ctx, 0, bob - s * 0.4, s * 0.5, bug.wobble);
+        A.eyes(ctx, 0, bob - s * 0.4, s * 0.5 * 0.26, s * 0.5 * 0.135, '#1c1712');
     }
 }

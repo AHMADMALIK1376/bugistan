@@ -80,7 +80,7 @@ class UFO {
         ctx.stroke();
         // a crying little pilot in the dome
         A.orb(ctx, s * 0.02, bob - s * 0.26, s * 0.11, s * 0.13, 0, '#8ce07a', { specA: 0.25 });
-        A.face(ctx, s * 0.02, bob - s * 0.28, s * 0.22, bug.wobble);
+        A.eyes(ctx, s * 0.02, bob - s * 0.28, s * 0.22 * 0.26, s * 0.22 * 0.135, '#1c1712');
         ctx.restore();
     }
 }

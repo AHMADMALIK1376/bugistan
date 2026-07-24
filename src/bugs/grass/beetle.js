@@ -1,48 +1,45 @@
-// ── GROUND BEETLE: bronze armor, striated elytra, working mandibles ──────
+// ── BEETLE: teal dome, mustard patches, weevil snout ──────
 class Beetle {
     static draw(ctx, s, bob, bug) {
-        const shell = '#c8763a';
-        // six sturdy legs in alternating tripod gait
-        A.legSet(ctx, s, bob, bug.legPhase, '#7a4520', { reach: 1.05, w: s * 0.07 });
-        // abdomen shell: high-gloss dome
-        A.orb(ctx, 0, bob + s * 0.16, s * 0.5, s * 0.62, 0, shell, { specA: 0.45 });
-        // elytra split + striation grooves
-        ctx.strokeStyle = 'rgba(18,12,6,0.65)';
-        ctx.lineWidth = 1.0;
-        ctx.beginPath(); ctx.moveTo(0, bob - s * 0.4); ctx.lineTo(0, bob + s * 0.76); ctx.stroke();
-        ctx.strokeStyle = 'rgba(120,92,50,0.35)';
-        ctx.lineWidth = 0.6;
-        for (let k = 1; k <= 3; k++) {
-            for (let side = -1; side <= 1; side += 2) {
-                ctx.beginPath();
-                ctx.moveTo(side * s * 0.13 * k, bob - s * 0.32);
-                ctx.quadraticCurveTo(side * s * 0.16 * k, bob + s * 0.2, side * s * 0.1 * k, bob + s * 0.62);
-                ctx.stroke();
-            }
-        }
-        // bronze sheen band sliding across the shell
-        const sheenX = Math.sin(bug.wobble * 0.8) * s * 0.2;
-        const sheen = ctx.createLinearGradient(sheenX - s * 0.3, bob - s * 0.2, sheenX + s * 0.3, bob + s * 0.4);
-        sheen.addColorStop(0, 'rgba(200,160,90,0)');
-        sheen.addColorStop(0.5, 'rgba(200,160,90,0.16)');
-        sheen.addColorStop(1, 'rgba(200,160,90,0)');
-        ctx.fillStyle = sheen;
-        ctx.beginPath(); ctx.ellipse(0, bob + s * 0.16, s * 0.5, s * 0.62, 0, 0, Math.PI * 2); ctx.fill();
-        // pronotum plate
-        A.orb(ctx, 0, bob - s * 0.42, s * 0.3, s * 0.22, 0, '#b5662c', { specA: 0.35 });
-        // head with heavy mandibles
-        A.orb(ctx, 0, bob - s * 0.66, s * 0.18, s * 0.15, 0, '#a85c26', {});
-        const chew = Math.sin(bug.legPhase * 0.7) * 0.12;
-        for (let side = -1; side <= 1; side += 2) {
-            ctx.strokeStyle = '#5c3414';
-            ctx.lineCap = 'round';
-            ctx.lineWidth = s * 0.06;
-            ctx.beginPath();
-            ctx.moveTo(side * s * 0.08, bob - s * 0.76);
-            ctx.quadraticCurveTo(side * s * (0.2 - chew), bob - s * 0.9, side * s * (0.06 + chew), bob - s * 0.96);
-            ctx.stroke();
-        }
-        A.face(ctx, 0, bob - s * 0.62, s * 0.48, bug.wobble);
-        A.antennae(ctx, s * 0.7, bob - s * 0.74, bug.antennaPhase, '#6e3f1c', { len: 0.7 });
+        const gait = bug.legPhase;
+        A.walk(ctx, s, gait, [
+            { ay: -0.05, out: 1.06, mid: -0.22, hip: 0.5 },
+            { ay: 0.3, out: 1.14, mid: 0.06, hip: 0.52 },
+            { ay: 0.6, out: 1.04, mid: 0.36, hip: 0.5 }
+        ], '#221C18', s * 0.07);
+        A.antenna(ctx, s, -s * 0.12, -s * 0.92, -s * 0.34, -s * 1.28, '#221C18', true);
+        A.antenna(ctx, s, s * 0.12, -s * 0.92, s * 0.34, -s * 1.28, '#221C18', true);
+
+        const cx = 0, cy = s * 0.2, rx = s * 0.94, ry = s * 1.0;
+        ctx.fillStyle = '#2C7468';
+        ctx.beginPath(); ctx.ellipse(cx, cy, rx + s * 0.04, ry + s * 0.04, 0, 0, Math.PI * 2); ctx.fill();
+        const g = ctx.createLinearGradient(-rx, cy - ry, rx, cy + ry);
+        g.addColorStop(0, '#5CC0A9'); g.addColorStop(0.55, '#3E9E8E'); g.addColorStop(1, '#2C7468');
+        ctx.fillStyle = g;
+        ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2); ctx.fill();
+
+        ctx.save();
+        ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2); ctx.clip();
+        ctx.strokeStyle = '#221C18'; ctx.lineCap = 'round'; ctx.lineWidth = s * 0.06;
+        ctx.beginPath(); ctx.moveTo(0, cy - ry); ctx.lineTo(0, cy + ry); ctx.stroke();
+        const patches = [[-0.42, -0.30, 0.20], [0.40, -0.22, 0.19], [-0.46, 0.18, 0.17], [0.46, 0.22, 0.18], [-0.2, 0.5, 0.16], [0.24, 0.5, 0.16], [0.02, 0.02, 0.14]];
+        for (const [px, py, pr] of patches) A.spot(ctx, px * s, cy + py * s, pr * s, '#EBBB58', '#CE9636');
+        const aog = ctx.createLinearGradient(0, cy + ry * 0.1, 0, cy + ry);
+        aog.addColorStop(0, 'rgba(20,60,52,0)'); aog.addColorStop(1, 'rgba(20,60,52,0.32)');
+        ctx.fillStyle = aog; ctx.fillRect(cx - rx, cy - ry, rx * 2, ry * 2.2);
+        ctx.restore();
+
+        ctx.save();
+        ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2); ctx.clip();
+        ctx.strokeStyle = 'rgba(220,255,246,0.4)'; ctx.lineWidth = s * 0.05; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.ellipse(cx, cy, rx * 0.97, ry * 0.97, 0, Math.PI * 1.08, Math.PI * 1.7); ctx.stroke();
+        ctx.restore();
+
+        A.body(ctx, 0, -s * 0.82, s * 0.3, s * 0.24, 0, '#33291F', false);
+        ctx.fillStyle = '#33291F';
+        ctx.beginPath(); ctx.ellipse(0, -s * 1.12, s * 0.08, s * 0.2, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,0.14)';
+        ctx.beginPath(); ctx.ellipse(-s * 0.1, -s * 0.94, s * 0.14, s * 0.09, -0.5, 0, Math.PI * 2); ctx.fill();
+        A.eyes(ctx, 0, -s * 0.82, s * 0.16, s * 0.095, '#221C18');
     }
 }

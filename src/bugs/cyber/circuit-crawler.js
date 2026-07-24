@@ -58,7 +58,7 @@ class CircuitCrawler {
         ctx.beginPath();
         ctx.roundRect(-s * 0.26, ys[0] - s * 0.22, s * 0.52, s * 0.4, s * 0.1);
         ctx.fill();
-        A.face(ctx, 0, ys[0] - s * 0.06, s * 0.42, bug.wobble);
+        A.eyes(ctx, 0, ys[0] - s * 0.06, s * 0.42 * 0.26, s * 0.42 * 0.135, '#1c1712');
         // antenna feelers
         A.antennae(ctx, s * 0.5, ys[0] - s * 0.22, bug.antennaPhase, '#26804a', { len: 0.5, club: true });
     }

@@ -83,7 +83,7 @@ class Shark {
         ctx.closePath();
         ctx.fill();
         // the crying face on the snout
-        A.face(ctx, 0, -s * 0.6, s * 0.5, bug.wobble);
+        A.eyes(ctx, 0, -s * 0.6, s * 0.5 * 0.26, s * 0.5 * 0.135, '#1c1712');
         ctx.restore();
     }
 }

@@ -42,7 +42,7 @@ class Antlion {
         // flat armored prothorax + head plate
         A.orb(ctx, 0, bob - s * 0.14, s * 0.24, s * 0.2, 0, '#ba6c3c', { specA: 0.2 });
         A.orb(ctx, 0, bob - s * 0.36, s * 0.18, s * 0.13, 0, '#aa6034', {});
-        A.face(ctx, 0, bob - s * 0.34, s * 0.46, bug.wobble);
+        A.eyes(ctx, 0, bob - s * 0.34, s * 0.46 * 0.26, s * 0.46 * 0.135, '#1c1712');
         // the sickle jaws: long curved calipers that snap shut
         const snap = Math.max(0, Math.sin(bug.legPhase * 0.6)) * 0.22;
         for (let side = -1; side <= 1; side += 2) {

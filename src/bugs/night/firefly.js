@@ -37,7 +37,7 @@ class Firefly {
         ctx.beginPath(); ctx.ellipse(0, bob - s * 0.24, s * 0.14, s * 0.08, 0, 0, Math.PI * 2); ctx.fill();
         // head peeking from under the hood
         A.orb(ctx, 0, bob - s * 0.4, s * 0.12, s * 0.1, 0, '#4252bc', {});
-        A.face(ctx, 0, bob - s * 0.22, s * 0.5, bug.wobble);
+        A.eyes(ctx, 0, bob - s * 0.22, s * 0.5 * 0.26, s * 0.5 * 0.135, '#1c1712');
         A.antennae(ctx, s * 0.6, bob - s * 0.48, bug.antennaPhase, '#2c3782', { len: 0.6 });
     }
 }

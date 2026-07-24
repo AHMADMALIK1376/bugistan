@@ -1,53 +1,26 @@
-// ── LEAFHOPPER: wedge of green glass, keeled folded wings ──────
+// ── LEAFHOPPER: green glassy wedge, shovel head ──────
 class Leafhopper {
     static draw(ctx, s, bob, bug) {
-        const body = '#4ade7e';
-        // spring legs with the signature spine rows
-        for (let side = -1; side <= 1; side += 2) {
-            const sw = Math.sin(bug.legPhase + (side > 0 ? Math.PI : 0)) * s * 0.1;
-            A.leg(ctx, side * s * 0.14, bob - s * 0.1, side * s * 0.4 + sw, bob + s * 0.12 + sw, side * s * 0.12, s * 0.045, '#2b9450');
-            // strong hind pair
-            A.leg(ctx, side * s * 0.16, bob + s * 0.12, side * s * 0.52 - sw, bob + s * 0.44 - sw, side * s * 0.22, s * 0.055, '#2b9450');
-        }
-        // wedge body: widest at the head, tapering to a point
-        ctx.save();
-        ctx.translate(0, bob);
-        const bg = ctx.createLinearGradient(-s * 0.34, 0, s * 0.34, 0);
-        bg.addColorStop(0, A.tone(body, -0.35));
-        bg.addColorStop(0.35, A.tone(body, 0.2));
-        bg.addColorStop(0.6, body);
-        bg.addColorStop(1, A.tone(body, -0.45));
-        ctx.fillStyle = bg;
-        ctx.beginPath();
-        ctx.moveTo(-s * 0.3, -s * 0.34);
-        ctx.quadraticCurveTo(-s * 0.34, s * 0.1, -s * 0.05, s * 0.78);
-        ctx.lineTo(s * 0.05, s * 0.78);
-        ctx.quadraticCurveTo(s * 0.34, s * 0.1, s * 0.3, -s * 0.34);
-        ctx.quadraticCurveTo(0, -s * 0.48, -s * 0.3, -s * 0.34);
-        ctx.closePath();
-        ctx.fill();
-        // folded wing keel + cyan sheen stripe
-        ctx.strokeStyle = 'rgba(20,40,12,0.6)';
-        ctx.lineWidth = 0.8;
-        ctx.beginPath(); ctx.moveTo(0, -s * 0.3); ctx.lineTo(0, s * 0.76); ctx.stroke();
-        ctx.strokeStyle = 'rgba(150,230,190,0.4)';
-        ctx.lineWidth = s * 0.05;
-        ctx.beginPath();
-        ctx.moveTo(-s * 0.16, -s * 0.2);
-        ctx.quadraticCurveTo(-s * 0.2, s * 0.2, -s * 0.04, s * 0.66);
-        ctx.stroke();
-        // spec highlight along the lit flank
-        ctx.fillStyle = 'rgba(255,255,240,0.22)';
-        ctx.beginPath();
-        ctx.ellipse(-s * 0.14, -s * 0.16, s * 0.08, s * 0.22, 0.12, 0, Math.PI * 2);
-        ctx.fill();
+        const gait = bug.legPhase;
+        A.walk(ctx, s, gait, [{ ay: -0.05, out: 0.72, mid: 0.12, hip: 0.16 }, { ay: 0.16, out: 0.88, mid: 0.36, hip: 0.18 }], '#3C9E52', s * 0.05);
+        // wedge body — widest at the head, tapering to a point
+        const g = ctx.createLinearGradient(-s * 0.3, 0, s * 0.3, 0);
+        g.addColorStop(0, '#3C9E52'); g.addColorStop(0.42, '#83D98C'); g.addColorStop(1, '#3C9E52');
+        ctx.fillStyle = g; ctx.beginPath();
+        ctx.moveTo(-s * 0.3, -s * 0.34); ctx.quadraticCurveTo(-s * 0.32, s * 0.2, -s * 0.05, s * 0.8); ctx.lineTo(s * 0.05, s * 0.8);
+        ctx.quadraticCurveTo(s * 0.32, s * 0.2, s * 0.3, -s * 0.34); ctx.quadraticCurveTo(0, -s * 0.5, -s * 0.3, -s * 0.34); ctx.closePath(); ctx.fill();
+        // soft ambient occlusion toward the tapering tail
+        ctx.save(); ctx.clip();
+        const aog = ctx.createLinearGradient(0, s * 0.3, 0, s * 0.85);
+        aog.addColorStop(0, 'rgba(16,40,14,0)'); aog.addColorStop(1, 'rgba(16,40,14,0.32)');
+        ctx.fillStyle = aog; ctx.fillRect(-s * 0.35, -s * 0.4, s * 0.7, s * 1.3);
         ctx.restore();
-        // blunt shovel head spanning the wedge's wide end
-        A.orb(ctx, 0, bob - s * 0.44, s * 0.26, s * 0.15, 0, '#74ea9e', { specA: 0.3 });
-        A.face(ctx, 0, bob - s * 0.42, s * 0.55, bug.wobble);
-        ctx.fillStyle = 'rgba(30,48,16,0.35)';
-        for (let k = -1; k <= 1; k++) {
-            ctx.beginPath(); ctx.arc(k * s * 0.08, bob - s * 0.5, s * 0.02, 0, Math.PI * 2); ctx.fill();
-        }
+        ctx.strokeStyle = 'rgba(20,54,16,0.5)'; ctx.lineCap = 'round'; ctx.lineWidth = s * 0.05; ctx.beginPath(); ctx.moveTo(0, -s * 0.3); ctx.lineTo(0, s * 0.76); ctx.stroke();
+        ctx.fillStyle = 'rgba(255,255,240,0.22)'; ctx.beginPath(); ctx.ellipse(-s * 0.14, -s * 0.16, s * 0.08, s * 0.24, 0.12, 0, Math.PI * 2); ctx.fill();
+        // wide shovel head + eyes + short antennae
+        A.body(ctx, 0, -s * 0.44, s * 0.28, s * 0.16, 0, '#83D98C');
+        A.eyes(ctx, 0, -s * 0.46, s * 0.17, s * 0.085, '#221C18');
+        A.antenna(ctx, s, -s * 0.16, -s * 0.54, -s * 0.28, -s * 0.82, '#3C9E52', false);
+        A.antenna(ctx, s, s * 0.16, -s * 0.54, s * 0.28, -s * 0.82, '#3C9E52', false);
     }
 }

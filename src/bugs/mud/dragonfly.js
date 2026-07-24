@@ -41,6 +41,6 @@ class Dragonfly {
         }
         // head: nearly all eye
         A.orb(ctx, 0, bob - s * 0.56, s * 0.24, s * 0.2, 0, '#1ea0c4', { specA: 0.2 });
-        A.face(ctx, 0, bob - s * 0.56, s * 0.6, bug.wobble);
+        A.eyes(ctx, 0, bob - s * 0.56, s * 0.6 * 0.26, s * 0.6 * 0.135, '#1c1712');
     }
 }

@@ -265,5 +265,79 @@ const A = {
         top.addColorStop(1, 'rgba(255,250,235,0)');
         ctx.fillStyle = top;
         ctx.fillRect(0, 0, W, H * 0.5);
+    },
+
+    // ============================================================
+    // FLAT-VECTOR SET — matte shading, small realistic eyes, no
+    // cartoon face. Same light source and palette conventions as
+    // the primitives above; used by the redesigned creatures.
+    // ============================================================
+
+    // matte body ellipse: flat fill + soft top-left gradient + gentle sheen
+    body(ctx, x, y, rx, ry, rot, base, spec) {
+        ctx.save(); ctx.translate(x, y); ctx.rotate(rot || 0);
+        const g = ctx.createLinearGradient(-rx, -ry, rx, ry);
+        g.addColorStop(0, A.tone(base, 0.16)); g.addColorStop(0.55, base); g.addColorStop(1, A.tone(base, -0.15));
+        ctx.fillStyle = g;
+        ctx.beginPath(); ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2); ctx.fill();
+        if (spec !== false) {
+            const sg = ctx.createRadialGradient(-rx * 0.35, -ry * 0.4, 0, -rx * 0.35, -ry * 0.4, Math.max(rx, ry) * 0.85);
+            sg.addColorStop(0, 'rgba(255,255,255,0.20)'); sg.addColorStop(1, 'rgba(255,255,255,0)');
+            ctx.fillStyle = sg;
+            ctx.beginPath(); ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.restore();
+    },
+
+    // little tarsus foot dot at the end of a leg
+    foot(ctx, x, y, r, color) { ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); },
+
+    // walking legs: alternating-tripod gait tied to bug.legPhase (which
+    // now scales with actual travel speed), with little feet.
+    walk(ctx, s, gait, rows, color, lw) {
+        rows.forEach((row, i) => {
+            for (let side = -1; side <= 1; side += 2) {
+                const tri = ((i + (side > 0 ? 1 : 0)) & 1) ? Math.PI : 0;
+                const step = Math.sin(gait + tri), lift = Math.max(0, Math.cos(gait + tri));
+                const hip = row.hip === undefined ? 0.5 : row.hip;
+                const x0 = side * s * hip, y0 = row.ay * s;
+                const x1 = side * s * (row.out - lift * 0.1), y1 = (row.ay + row.mid) * s + step * s * 0.22;
+                A.leg(ctx, x0, y0, x1, y1, side * s * 0.2, lw, color);
+                A.foot(ctx, x1, y1, lw * 0.78, color);
+            }
+        });
+    },
+
+    // small realistic eyes: dark bead + catch-light, no sparkle, no mouth
+    eyes(ctx, cx, cy, spread, r, dark) {
+        for (let side = -1; side <= 1; side += 2) {
+            ctx.fillStyle = '#FBF4E6';
+            ctx.beginPath(); ctx.ellipse(cx + side * spread, cy, r, r * 1.15, 0, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = dark;
+            ctx.beginPath(); ctx.arc(cx + side * spread + r * 0.08, cy + r * 0.16, r * 0.5, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = 'rgba(255,255,255,0.9)';
+            ctx.beginPath(); ctx.arc(cx + side * spread - r * 0.22, cy - r * 0.26, r * 0.28, 0, Math.PI * 2); ctx.fill();
+        }
+    },
+
+    // antenna from (bx,by) to (tx,ty), optional gold club tip
+    antenna(ctx, s, bx, by, tx, ty, color, club) {
+        ctx.strokeStyle = color; ctx.lineCap = 'round'; ctx.lineWidth = s * 0.055;
+        ctx.beginPath(); ctx.moveTo(bx, by); ctx.quadraticCurveTo((bx + tx) * 0.5, by - (by - ty) * 0.6, tx, ty); ctx.stroke();
+        if (club) {
+            ctx.fillStyle = '#F5C95A';
+            ctx.beginPath(); ctx.arc(tx, ty, s * 0.09, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = 'rgba(255,255,255,0.4)';
+            ctx.beginPath(); ctx.arc(tx - s * 0.03, ty - s * 0.03, s * 0.035, 0, Math.PI * 2); ctx.fill();
+        }
+    },
+
+    // shaded spot/patch (spots, markings) with a soft light catch
+    spot(ctx, x, y, r, hi, lo) {
+        const g = ctx.createRadialGradient(x - r * 0.28, y - r * 0.3, 0, x, y, r);
+        g.addColorStop(0, hi); g.addColorStop(1, lo);
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = 'rgba(255,248,214,0.4)';
+        ctx.beginPath(); ctx.arc(x - r * 0.28, y - r * 0.3, r * 0.3, 0, Math.PI * 2); ctx.fill();
     }
 };

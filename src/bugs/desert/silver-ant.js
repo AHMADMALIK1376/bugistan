@@ -28,7 +28,7 @@ class SilverAnt {
         A.glow(ctx, 0, bob, s * 0.9, '#ffffff', shimmer * 0.5);
         // head: triangular, chrome, big dark eyes
         A.orb(ctx, 0, bob - s * 0.38, s * 0.17, s * 0.15, 0, '#c8d2dc', { specA: 0.6 });
-        A.face(ctx, 0, bob - s * 0.38, s * 0.44, bug.wobble);
+        A.eyes(ctx, 0, bob - s * 0.38, s * 0.44 * 0.26, s * 0.44 * 0.135, '#1c1712');
         // elbowed antennae — the ant signature
         for (let side = -1; side <= 1; side += 2) {
             const wave = Math.sin(bug.antennaPhase + side) * s * 0.06;

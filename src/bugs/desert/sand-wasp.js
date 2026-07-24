@@ -43,7 +43,7 @@ class SandWasp {
         }
         // head with huge wraparound eyes — sand wasps hunt by sight
         A.orb(ctx, 0, bob - s * 0.42, s * 0.17, s * 0.16, 0, '#e0a030', {});
-        A.face(ctx, 0, bob - s * 0.42, s * 0.46, bug.wobble);
+        A.eyes(ctx, 0, bob - s * 0.42, s * 0.46 * 0.26, s * 0.46 * 0.135, '#1c1712');
         A.antennae(ctx, s * 0.6, bob - s * 0.54, bug.antennaPhase, '#5c3e10', { len: 0.6 });
     }
 }
