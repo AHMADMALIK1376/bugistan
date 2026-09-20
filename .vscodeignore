@@ -1,14 +1,19 @@
+# The webview is read from src/ at run time (src/garden.html, src/bugs, src/backgrounds),
+# so src stays in the package — only the TypeScript that webpack has already bundled goes.
 .vscode/**
 .vscode-test/**
+.vscode-test.mjs
 out/**
 node_modules/**
-src/**
 .gitignore
-.yarnrc
+.eslintignore
+.eslintrc.json
+eslint.config.mjs
 webpack.config.js
 vsc-extension-quickstart.md
+package-lock.json
 **/tsconfig.json
-**/eslint.config.mjs
-**/*.map
 **/*.ts
-**/.vscode-test.*
+**/*.map
+# the screenshots are served from GitHub in the README, so they need not ship
+media/screenshots/**
