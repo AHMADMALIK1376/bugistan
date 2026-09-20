@@ -1,15 +1,39 @@
 {
   "name": "bugistan",
   "displayName": "Bugistan",
-  "description": "🐛 Error aya, cockroach bhaga! Kill bugs with a slipper! 🩴",
+  "description": "Your errors and warnings become bugs crawling across the screen. Squash them with a slipper — or fix your code. 🩴",
   "version": "1.0.0",
   "publisher": "ahmadmalik1376",
+  "license": "MIT",
+  "icon": "media/icon.png",
+  "galleryBanner": {
+    "color": "#16181D",
+    "theme": "dark"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AHMADMALIK1376/bugistan.git"
+  },
+  "bugs": {
+    "url": "https://github.com/AHMADMALIK1376/bugistan/issues"
+  },
+  "homepage": "https://github.com/AHMADMALIK1376/bugistan#readme",
+  "keywords": [
+    "game",
+    "fun",
+    "diagnostics",
+    "errors",
+    "gamification",
+    "productivity",
+    "canvas",
+    "bugs"
+  ],
   "engines": {
     "vscode": "^1.85.0"
   },
   "categories": [
     "Other",
-    "Themes"
+    "Visualization"
   ],
   "activationEvents": [
     "onStartupFinished"
@@ -85,6 +109,7 @@
     }
   },
   "scripts": {
+    "vscode:prepublish": "npm run package",
     "compile": "webpack",
     "watch": "webpack --watch",
     "package": "webpack --mode production",
